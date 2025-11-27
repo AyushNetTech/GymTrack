@@ -13,8 +13,6 @@ import { useNavigation } from '@react-navigation/native'
 export default function AuthScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const navigation = useNavigation<any>()
@@ -28,29 +26,23 @@ export default function AuthScreen() {
 
   async function signUp() {
     setLoading(true)
-    const { data, error } = await supabase.auth.signUp({ email, password })
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    })
+
+    setLoading(false)
+
     if (error) {
       Alert.alert(error.message)
-      setLoading(false)
-      return
+    } else {
+      Alert.alert("Verify Email", "Check your email and click the verification link.")
     }
-
-    if (data.user) {
-      const { error: metaError } = await supabase.auth.updateUser({
-        data: { display_name: username, phone }
-      })
-      if (metaError) Alert.alert(metaError.message)
-    }
-
-    Alert.alert("Success", "Check your email to verify your account.")
-    setLoading(false)
   }
 
   async function resetPassword() {
-    if (!email) {
-      Alert.alert("Enter your email first")
-      return
-    }
+    if (!email) return Alert.alert("Enter your email first")
 
     setLoading(true)
 
@@ -60,11 +52,8 @@ export default function AuthScreen() {
 
     setLoading(false)
 
-    if (error) {
-      Alert.alert(error.message)
-    } else {
-      Alert.alert("Email Sent", "Check your inbox for reset link.")
-    }
+    if (error) Alert.alert(error.message)
+    else Alert.alert("Email Sent", "Check your inbox for the reset link.")
   }
 
   return (
@@ -74,8 +63,8 @@ export default function AuthScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
         autoCapitalize="none"
+        value={email}
         onChangeText={setEmail}
       />
 
@@ -86,24 +75,6 @@ export default function AuthScreen() {
         value={password}
         onChangeText={setPassword}
       />
-
-      {isSignUp && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Phone Number"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
-        </>
-      )}
 
       <TouchableOpacity
         style={[styles.btn, { backgroundColor: '#2e86de' }]}

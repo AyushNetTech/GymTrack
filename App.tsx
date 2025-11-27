@@ -8,12 +8,17 @@ import AuthScreen from './screens/AuthScreen'
 import HomeScreen from './screens/HomeScreen'
 import ResetPasswordScreen from './screens/ResetPasswordScreen'
 import { Session } from '@supabase/supabase-js'
+import ProfileSetupScreen from './screens/ProfileSetupScreen';
+
 
 type RootStackParamList = {
   Auth: undefined
   Home: undefined
   ResetPassword: { url?: string } | undefined
+  ProfileSetup: undefined   // ✅ NEW
 }
+
+
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>()
 
@@ -77,6 +82,28 @@ export default function App() {
     )
   }
 
+  supabase.auth.onAuthStateChange(async (event, session) => {
+  setSession(session);
+
+  if (event === "SIGNED_IN" && session?.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", session.user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      if (navigationRef.isReady()) {
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: "ProfileSetup" }],
+        });
+      }
+    }
+  }
+});
+
+
   return (
     <PaperProvider>
       <NavigationContainer linking={linking} ref={navigationRef} fallback={<></>}>
@@ -92,6 +119,9 @@ export default function App() {
             component={ResetPasswordScreen}
             options={{ presentation: 'modal' }}
           />
+
+          <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
