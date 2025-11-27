@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Linking } from 'react-native'
+import { Alert, Linking, ActivityIndicator, View } from 'react-native'
 import { NavigationContainer, LinkingOptions, createNavigationContainerRef } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Provider as PaperProvider } from 'react-native-paper'
@@ -10,9 +10,9 @@ import ResetPasswordScreen from './screens/ResetPasswordScreen'
 import { Session } from '@supabase/supabase-js'
 
 type RootStackParamList = {
-Auth: undefined
-Home: undefined
-ResetPassword: { url?: string } | undefined
+  Auth: undefined
+  Home: undefined
+  ResetPassword: { url?: string } | undefined
 }
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>()
@@ -20,73 +20,80 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>()
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 const linking: LinkingOptions<RootStackParamList> = {
-prefixes: ['myapp://'],
-config: {
-screens: {
-ResetPassword: 'reset-password',
-},
-},
+  prefixes: ['myapp://'],
+  config: {
+    screens: {
+      ResetPassword: 'reset-password',
+    },
+  },
 }
 
 export default function App() {
-const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [loading, setLoading] = useState(true) // 👈 NEW
 
-useEffect(() => {
-supabase.auth.getSession().then(({ data: { session } }) => {
-setSession(session)
-})
+  // Load session FIRST (before showing screens)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false) // 👈 Only now UI should render
+    })
 
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
 
-const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-  setSession(session)
-})
+    return () => listener.subscription.unsubscribe()
+  }, [])
 
-return () => listener.subscription.unsubscribe()
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const url = event.url
 
-
-}, [])
-
-useEffect(() => {
-const handleDeepLink = (event: { url: string }) => {
-const url = event.url
-
-  if (navigationRef.isReady()) {
-    // Directly pass full URL to ResetPasswordScreen
-    navigationRef.navigate('ResetPassword', { url })
-  } else {
-    Alert.alert('Navigation not ready', 'Cannot navigate yet')
-  }
-}
-
-const subscription = Linking.addEventListener('url', handleDeepLink)
-
-// Handle initial URL
-Linking.getInitialURL().then((url) => {
-  if (url) {
-    if (navigationRef.isReady()) {
-      navigationRef.navigate('ResetPassword', { url })
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('ResetPassword', { url })
+      } else {
+        Alert.alert('Navigation not ready', 'Cannot navigate yet')
+      }
     }
+
+    const subscription = Linking.addEventListener('url', handleDeepLink)
+
+    Linking.getInitialURL().then((url) => {
+      if (url && navigationRef.isReady()) {
+        navigationRef.navigate('ResetPassword', { url })
+      }
+    })
+
+    return () => subscription.remove()
+  }, [])
+
+  // 💥 Show loading screen until session is restored
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    )
   }
-})
 
-return () => subscription.remove()
+  return (
+    <PaperProvider>
+      <NavigationContainer linking={linking} ref={navigationRef} fallback={<></>}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {session ? (
+            <Stack.Screen name="Home" component={HomeScreen} />
+          ) : (
+            <Stack.Screen name="Auth" component={AuthScreen} />
+          )}
 
-
-}, [])
-
-return ( <PaperProvider>
-<NavigationContainer linking={linking} ref={navigationRef} fallback={<></>}>
-<Stack.Navigator screenOptions={{ headerShown: false }}>
-{session ? (
-<Stack.Screen name="Home" component={HomeScreen} />
-) : (
-<Stack.Screen name="Auth" component={AuthScreen} />
-)}
-<Stack.Screen
-name="ResetPassword"
-component={ResetPasswordScreen}
-options={{ presentation: 'modal' }}
-/>
-</Stack.Navigator> </NavigationContainer> </PaperProvider>
-)
+          <Stack.Screen
+            name="ResetPassword"
+            component={ResetPasswordScreen}
+            options={{ presentation: 'modal' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
+  )
 }
