@@ -1,35 +1,24 @@
-import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react'
+import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { supabase } from '../lib/supabase'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../App'
 
-type RootStackParamList = {
-  Auth: undefined;
-  Home: undefined;
-  ResetPassword: { url?: string } | undefined;
-  ProfileSetup: undefined;
-};
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'ProfileSetup'>
+}
 
-type ProfileNavProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "ProfileSetup"
->;
+export default function ProfileSetupScreen({ navigation }: Props) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [username, setUsername] = useState('')
+  const [phone, setPhone] = useState('')
 
-export default function ProfileSetupScreen({ navigation }: { navigation: ProfileNavProp })
+  const saveProfile = async () => {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return Alert.alert('Error', 'User not found')
 
-{
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
-
-  async function saveProfile() {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData?.user) return;
-
-    const id = userData.user.id;
-
+    const id = userData.user.id
     const { error } = await supabase.from('profiles').upsert({
       id,
       first_name: firstName,
@@ -37,33 +26,27 @@ export default function ProfileSetupScreen({ navigation }: { navigation: Profile
       username,
       phone,
       email: userData.user.email,
-    });
+    })
 
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Profile created!");
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    if (error) Alert.alert('Error', error.message)
+    else {
+      Alert.alert('Success', 'Profile created!')
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
     }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Complete Your Profile</Text>
-
       <TextInput style={styles.input} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
-
       <TextInput style={styles.input} placeholder="Last Name" value={lastName} onChangeText={setLastName} />
-
       <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-
-      <TextInput style={styles.input} placeholder="Phone Number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
-
+      <TextInput style={styles.input} placeholder="Phone Number" value={phone} keyboardType="phone-pad" onChangeText={setPhone} />
       <TouchableOpacity style={styles.btn} onPress={saveProfile}>
         <Text style={styles.btnText}>Save & Continue</Text>
       </TouchableOpacity>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -72,4 +55,4 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: '#ccc', padding: 12, borderRadius: 6, marginBottom: 12 },
   btn: { backgroundColor: '#2e86de', padding: 14, borderRadius: 6 },
   btnText: { color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: '700' },
-});
+})

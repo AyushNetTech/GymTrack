@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  View,
-  TextInput,
-  Alert,
-  StyleSheet,
-  Button,
-  Text,
-  Linking,
-  TouchableOpacity
-} from 'react-native'
+import { View, TextInput, Alert, StyleSheet, Button, Text, Linking, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
@@ -26,10 +17,8 @@ export default function ResetPasswordScreen() {
   const [refreshToken, setRefreshToken] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
 
-  // --- your original logic below (unchanged) ---
   const parseTokensFromUrl = (url: string | null) => {
     if (!url) return { accessToken: null, refreshToken: null }
-
     try {
       const params = new URL(url).searchParams
       let access = params.get('access_token')
@@ -42,19 +31,23 @@ export default function ResetPasswordScreen() {
         refresh = refresh || hashParams.get('refresh_token')
       }
 
+      Alert.alert('DEBUG', `Parsed tokens\naccess: ${access}\nrefresh: ${refresh}`)
       return { accessToken: access, refreshToken: refresh }
-    } catch {
+    } catch (err: any) {
+      Alert.alert('ERROR', 'Failed to parse URL: ' + err.message)
       return { accessToken: null, refreshToken: null }
     }
   }
 
   useEffect(() => {
     const handleUrl = (url: string | null) => {
+      Alert.alert('DEBUG', 'handleUrl called with: ' + url)
       const { accessToken, refreshToken } = parseTokensFromUrl(url)
       if (accessToken && refreshToken) {
         setAccessToken(accessToken)
         setRefreshToken(refreshToken)
         setReady(true)
+        Alert.alert('DEBUG', 'Tokens set and ready')
       }
     }
 
@@ -70,27 +63,13 @@ export default function ResetPasswordScreen() {
   }, [route.params])
 
   const updatePassword = async () => {
-    if (!password) {
-      Alert.alert('Error', 'Enter a new password')
-      return
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match')
-      return
-    }
-
-    if (!accessToken || !refreshToken) {
-      Alert.alert('Error', 'Missing access or refresh token')
-      return
-    }
+    if (!password) return Alert.alert('Error', 'Enter a new password')
+    if (password.length < 6) return Alert.alert('Error', 'Password must be at least 6 characters')
+    if (password !== confirmPassword) return Alert.alert('Error', 'Passwords do not match')
+    if (!accessToken || !refreshToken) return Alert.alert('Error', 'Missing access or refresh token')
 
     setLoading(true)
+    Alert.alert('DEBUG', 'Calling setSession')
 
     const { error: sessionError } = await supabase.auth.setSession({
       access_token: accessToken,
@@ -99,17 +78,17 @@ export default function ResetPasswordScreen() {
 
     if (sessionError) {
       setLoading(false)
-      Alert.alert('Error', sessionError.message)
-      return
+      return Alert.alert('Error', sessionError.message)
     }
+
+    Alert.alert('DEBUG', 'Session set, updating user password')
 
     const { error: updateError } = await supabase.auth.updateUser({ password })
     setLoading(false)
 
-    if (updateError) {
-      Alert.alert('Error', updateError.message)
-      return
-    }
+    if (updateError) return Alert.alert('Error', updateError.message)
+
+    Alert.alert('DEBUG', 'Password updated, navigating to Home')
 
     navigation.reset({
       index: 0,
@@ -127,8 +106,6 @@ export default function ResetPasswordScreen() {
 
   return (
     <View style={styles.container}>
-
-      {/* NEW PASSWORD FIELD */}
       <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
@@ -137,20 +114,15 @@ export default function ResetPasswordScreen() {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity
-          style={styles.eyeIcon}
-          onPress={() => setShowPassword(!showPassword)}
-        >
-          <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color="#666" />
+        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+          <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#666" />
         </TouchableOpacity>
       </View>
 
-      {/* VALIDATION TEXT */}
       {password.length > 0 && password.length < 6 && (
         <Text style={styles.validationText}>Password must be at least 6 characters</Text>
       )}
 
-      {/* CONFIRM PASSWORD */}
       <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
@@ -159,24 +131,16 @@ export default function ResetPasswordScreen() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
-        <TouchableOpacity
-          style={styles.eyeIcon}
-          onPress={() => setShowConfirm(!showConfirm)}
-        >
-          <Ionicons name={showConfirm ? "eye-off" : "eye"} size={22} color="#666" />
+        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowConfirm(!showConfirm)}>
+          <Ionicons name={showConfirm ? 'eye-off' : 'eye'} size={22} color="#666" />
         </TouchableOpacity>
       </View>
 
-      {/* MISMATCH TEXT */}
       {confirmPassword.length > 0 && confirmPassword !== password && (
         <Text style={styles.validationText}>Passwords do not match</Text>
       )}
 
-      <Button
-        title={loading ? 'Updating...' : 'Update Password'}
-        onPress={updatePassword}
-        disabled={loading}
-      />
+      <Button title={loading ? 'Updating...' : 'Update Password'} onPress={updatePassword} disabled={loading} />
     </View>
   )
 }
@@ -184,22 +148,8 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20 },
   inputWrapper: { position: 'relative', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    paddingRight: 40,
-    borderRadius: 6,
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 10,
-    top: 14,
-  },
-  validationText: {
-    color: 'red',
-    marginBottom: 10,
-    fontSize: 13,
-  },
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, paddingRight: 40, borderRadius: 6 },
+  eyeIcon: { position: 'absolute', right: 10, top: 14 },
+  validationText: { color: 'red', marginBottom: 10, fontSize: 13 },
   waitingText: { textAlign: 'center', fontSize: 16, color: '#555' },
 })

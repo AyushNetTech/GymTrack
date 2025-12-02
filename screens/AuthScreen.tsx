@@ -1,18 +1,13 @@
 import React, { useState } from 'react'
-import {
-  Alert,
-  StyleSheet,
-  TextInput,
-  View,
-  Text,
-  TouchableOpacity,
-} from 'react-native'
+import { Alert, StyleSheet, TextInput, View, Text, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { useNavigation } from '@react-navigation/native'
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const navigation = useNavigation<any>()
@@ -20,67 +15,53 @@ export default function AuthScreen() {
   async function signIn() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) Alert.alert(error.message)
     setLoading(false)
+    if (error) Alert.alert('Error', error.message)
   }
 
   async function signUp() {
     setLoading(true)
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
+    const { data, error } = await supabase.auth.signUp({ email, password })
     setLoading(false)
+    if (error) return Alert.alert('Error', error.message)
 
-    if (error) {
-      Alert.alert(error.message)
-    } else {
-      Alert.alert("Verify Email", "Check your email and click the verification link.")
+    if (data.user) {
+      const { error: metaError } = await supabase.auth.updateUser({
+        data: { display_name: username, phone },
+      })
+      if (metaError) Alert.alert('Error', metaError.message)
     }
+
+    Alert.alert('Success', 'Check your email to verify your account.')
   }
 
   async function resetPassword() {
-    if (!email) return Alert.alert("Enter your email first")
+    if (!email) return Alert.alert('Error', 'Enter your email first')
 
     setLoading(true)
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "myapp://reset-password",
+      redirectTo: 'myapp://reset-password',
     })
-
     setLoading(false)
 
-    if (error) Alert.alert(error.message)
-    else Alert.alert("Email Sent", "Check your inbox for the reset link.")
+    if (error) Alert.alert('Error', error.message)
+    else Alert.alert('Success', 'Check your inbox for reset link.')
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
+      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
+      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
+      {isSignUp && (
+        <>
+          <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
+          <TextInput style={styles.input} placeholder="Phone Number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        </>
+      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      <TouchableOpacity
-        style={[styles.btn, { backgroundColor: '#2e86de' }]}
-        onPress={isSignUp ? signUp : signIn}
-        disabled={loading}
-      >
+      <TouchableOpacity style={[styles.btn, { backgroundColor: '#2e86de' }]} onPress={isSignUp ? signUp : signIn} disabled={loading}>
         <Text style={styles.btnText}>{isSignUp ? 'Sign Up' : 'Sign In'}</Text>
       </TouchableOpacity>
 
@@ -91,11 +72,7 @@ export default function AuthScreen() {
       )}
 
       <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
-        <Text style={styles.switch}>
-          {isSignUp
-            ? 'Already have an account? Sign In'
-            : "Don't have an account? Sign Up"}
-        </Text>
+        <Text style={styles.switch}>{isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</Text>
       </TouchableOpacity>
     </View>
   )
