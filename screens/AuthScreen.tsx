@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Alert, StyleSheet, TextInput, View, Text, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { useNavigation } from '@react-navigation/native'
+import EmailActionDialog from '../components/EmailActionDialog';
+
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('')
@@ -11,6 +13,9 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const navigation = useNavigation<any>()
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+const [emailDialogMessage, setEmailDialogMessage] = useState('');
+
 
   async function signIn() {
     setLoading(true)
@@ -33,8 +38,10 @@ export default function AuthScreen() {
   setLoading(false)
 
   if (error) return Alert.alert('Error', error.message)
-
-  Alert.alert('Success', 'Check your email to verify your account.')
+  else{
+    setEmailDialogMessage('Check your email and click the verification link!');
+    setShowEmailDialog(true);
+  }
 }
 
 
@@ -48,7 +55,12 @@ export default function AuthScreen() {
     setLoading(false)
 
     if (error) Alert.alert('Error', error.message)
-    else Alert.alert('Success', 'Check your inbox for reset link.')
+    else{
+      
+      setEmailDialogMessage('Check your inbox and follow the link to reset your password!');
+      setShowEmailDialog(true);
+    }
+    
   }
 
   return (
@@ -76,6 +88,14 @@ export default function AuthScreen() {
       <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
         <Text style={styles.switch}>{isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</Text>
       </TouchableOpacity>
+      <EmailActionDialog
+        visible={showEmailDialog}
+        duration={10}
+        message={emailDialogMessage}
+        onTimeout={() => setShowEmailDialog(false)}
+      />
+
+
     </View>
   )
 }
