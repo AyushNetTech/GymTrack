@@ -25,9 +25,11 @@ const linking: LinkingOptions<RootStackParamList> = {
   config: {
     screens: {
       ResetPassword: 'reset-password',
+      ProfileSetup: 'profile-setup',
     },
   },
-}
+};
+
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -37,33 +39,69 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession()
+      Alert.alert("Initial Session", session ? "Found" : "NULL");
       setSession(session)
       setLoading(false)
     }
     init()
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+       Alert.alert("Auth Change", `Event: ${_event}\nSession: ${session ? "YES" : "NO"}`);
       setSession(session)
     })
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  // Handle deep links
-  useEffect(() => {
-    const handleDeepLink = (event: { url: string }) => {
-      if (navigationRef.isReady()) {
-        navigationRef.navigate('ResetPassword', { url: event.url })
-      }
-    }
-    const subscription = Linking.addEventListener('url', handleDeepLink)
+  const handleAuthCallback = async (url: string) => {
+  const [, hash] = url.split('#');
+  if (!hash) return;
 
-    Linking.getInitialURL().then(url => {
-      if (url && navigationRef.isReady() && url.startsWith('myapp://reset-password')) {
-        navigationRef.navigate('ResetPassword', { url })
-      }
-    })
-    return () => subscription.remove()
-  }, [])
+  const params = new URLSearchParams(hash);
+  const access_token = params.get('access_token');
+  const refresh_token = params.get('refresh_token');
+
+  if (access_token && refresh_token) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+
+    if (error) {
+      console.log('Error setting session:', error.message);
+      return;
+    }
+
+    console.log('Signed in successfully', data.session);
+    setSession(data.session);
+    setLoading(false); // important for navigator to render HomeScreen
+  }
+};
+
+
+  // Handle deep links
+ useEffect(() => {
+  const handleDeepLink = (event: { url: string }) => {
+    const url = event.url;
+    if (url.startsWith("myapp://reset-password")) {
+      navigationRef.isReady() && navigationRef.navigate("ResetPassword", { url });
+      return;
+    }
+    if (url.startsWith("myapp://auth/callback")) {
+      handleAuthCallback(url); // parse tokens and set session
+      return;
+    }
+  };
+
+  const subscription = Linking.addEventListener("url", handleDeepLink);
+
+  // Cold start
+  Linking.getInitialURL().then((url) => {
+    if (url) handleDeepLink({ url });
+  });
+
+  return () => subscription.remove();
+}, []);
+
 
   // Check profile if user logged in
   useEffect(() => {
@@ -76,6 +114,8 @@ export default function App() {
         .maybeSingle()
 
       if (!profile && navigationRef.isReady()) {
+        Alert.alert("Profile Missing", "Redirecting to Profile Setup");
+
         navigationRef.reset({
           index: 0,
           routes: [{ name: 'ProfileSetup' }],

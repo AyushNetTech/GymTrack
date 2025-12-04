@@ -20,20 +20,23 @@ export default function AuthScreen() {
   }
 
   async function signUp() {
-    setLoading(true)
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    setLoading(false)
-    if (error) return Alert.alert('Error', error.message)
+  setLoading(true)
 
-    if (data.user) {
-      const { error: metaError } = await supabase.auth.updateUser({
-        data: { display_name: username, phone },
-      })
-      if (metaError) Alert.alert('Error', metaError.message)
-    }
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: 'myapp://auth/callback',
+    },
+  })
 
-    Alert.alert('Success', 'Check your email to verify your account.')
-  }
+  setLoading(false)
+
+  if (error) return Alert.alert('Error', error.message)
+
+  Alert.alert('Success', 'Check your email to verify your account.')
+}
+
 
   async function resetPassword() {
     if (!email) return Alert.alert('Error', 'Enter your email first')
@@ -56,8 +59,7 @@ export default function AuthScreen() {
 
       {isSignUp && (
         <>
-          <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-          <TextInput style={styles.input} placeholder="Phone Number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+          
         </>
       )}
 
