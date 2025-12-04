@@ -1,81 +1,130 @@
-import React, { useState } from 'react'
-import { Alert, StyleSheet, TextInput, View, Text, TouchableOpacity } from 'react-native'
-import { supabase } from '../lib/supabase'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { supabase } from '../lib/supabase';
+import { useNavigation } from '@react-navigation/native';
 import EmailActionDialog from '../components/EmailActionDialog';
-
+import EmailExistsDialog from '../components/EmailExistsDialog';
 
 export default function AuthScreen() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [phone, setPhone] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [isSignUp, setIsSignUp] = useState(false)
-  const navigation = useNavigation<any>()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  const navigation = useNavigation<any>();
+
+  // Dialog states
   const [showEmailDialog, setShowEmailDialog] = useState(false);
-const [emailDialogMessage, setEmailDialogMessage] = useState('');
+  const [emailDialogMessage, setEmailDialogMessage] = useState('');
+  const [showExistsDialog, setShowExistsDialog] = useState(false);
 
-
+  // ------------------------------------
+  // SIGN IN
+  // ------------------------------------
   async function signIn() {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) Alert.alert('Error', error.message)
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("login Error",error.message)
+      return;
+    }
+
+    if (!data.session) {
+      Alert.alert("Please verify your email before signing in.")
+      return;
+    }
+
+    navigation.navigate("Home");
   }
 
+  // ------------------------------------
+  // SIGN UP
+  // ------------------------------------
   async function signUp() {
-  setLoading(true)
+    setLoading(true);
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: 'myapp://auth/callback',
-    },
-  })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: 'myapp://auth/callback' },
+    });
 
-  setLoading(false)
+    setLoading(false);
 
-  if (error) return Alert.alert('Error', error.message)
-  else{
-    setEmailDialogMessage('Check your email and click the verification link!');
+    if (error) {
+      Alert.alert("login Error",error.message)
+      return;
+    }
+
+    // VERY IMPORTANT — check if email already exists
+    if (data.user?.identities?.length === 0) {
+      setShowExistsDialog(true);
+      return;
+    }
+
+    // Show dialog for verification email sent
+    setEmailDialogMessage("A verification link has been sent to your email. Please verify to complete signup.");
     setShowEmailDialog(true);
   }
-}
 
-
+  // ------------------------------------
+  // RESET PASSWORD
+  // ------------------------------------
   async function resetPassword() {
-    if (!email) return Alert.alert('Error', 'Enter your email first')
+    if (!email) {
+      Alert.alert("Please Enter Your Email First")
+      return;
+    }
 
-    setLoading(true)
+    setLoading(true);
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: 'myapp://reset-password',
-    })
-    setLoading(false)
+    });
 
-    if (error) Alert.alert('Error', error.message)
-    else{
-      
-      setEmailDialogMessage('Check your inbox and follow the link to reset your password!');
-      setShowEmailDialog(true);
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("login Error",error.message)
+      return;
     }
-    
+
+    setEmailDialogMessage("Password reset email sent! Please check your inbox.");
+    setShowEmailDialog(true);
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
 
-      {isSignUp && (
-        <>
-          
-        </>
-      )}
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+      />
 
-      <TouchableOpacity style={[styles.btn, { backgroundColor: '#2e86de' }]} onPress={isSignUp ? signUp : signIn} disabled={loading}>
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TouchableOpacity
+        style={[styles.btn, { backgroundColor: '#2e86de' }]}
+        onPress={isSignUp ? signUp : signIn}
+        disabled={loading}
+      >
         <Text style={styles.btnText}>{isSignUp ? 'Sign Up' : 'Sign In'}</Text>
       </TouchableOpacity>
 
@@ -86,8 +135,12 @@ const [emailDialogMessage, setEmailDialogMessage] = useState('');
       )}
 
       <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
-        <Text style={styles.switch}>{isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</Text>
+        <Text style={styles.switch}>
+          {isSignUp ? 'Already have an account? Sign In' : "Don’t have an account? Sign Up"}
+        </Text>
       </TouchableOpacity>
+
+      {/* -------- Dialogs -------- */}
       <EmailActionDialog
         visible={showEmailDialog}
         duration={10}
@@ -95,9 +148,17 @@ const [emailDialogMessage, setEmailDialogMessage] = useState('');
         onTimeout={() => setShowEmailDialog(false)}
       />
 
-
+      <EmailExistsDialog
+        visible={showExistsDialog}
+        email={email}
+        onClose={() => setShowExistsDialog(false)}
+        onSignIn={() => {
+          setShowExistsDialog(false);
+          setIsSignUp(false); // switch to sign-in
+        }}
+      />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -108,4 +169,4 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: '600' },
   forgot: { textAlign: 'center', color: '#2e86de', marginTop: 10 },
   switch: { textAlign: 'center', color: '#10ac84', marginTop: 20, fontWeight: '600' },
-})
+});
