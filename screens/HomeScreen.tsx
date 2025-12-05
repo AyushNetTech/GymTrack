@@ -1,39 +1,13 @@
 import React from 'react'
-import { View, StyleSheet } from 'react-native'
-import { Text, Button } from 'react-native-paper'
-import { supabase } from '../lib/supabase'
+import { View } from 'react-native'
+import { Text } from 'react-native-paper'
+
 
 export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      <Text variant="headlineMedium">You are logged in 🎉</Text>
-      
-      <Button mode="contained" style={{ marginTop: 20 }} onPress={() => supabase.auth.signOut()}>
-        Sign Out
-      </Button>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text>Home Screen</Text>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', 
-    
-  },
-})
