@@ -4,9 +4,9 @@ import { Portal, Dialog } from 'react-native-paper';
 
 type Props = {
   visible: boolean;
-  onClose: () => void;      // when user taps "Cancel" or outside
-  onSignIn: () => void;     // when user taps "Sign In" button
-  email?: string;           // optional, show the email
+  onClose: () => void;
+  onSignIn: () => void;
+  email?: string;
 };
 
 export default function EmailExistsDialog({ visible, onClose, onSignIn, email }: Props) {
@@ -14,8 +14,8 @@ export default function EmailExistsDialog({ visible, onClose, onSignIn, email }:
 
   return (
     <Portal>
-      <Dialog visible={visible} dismissable={true} onDismiss={onClose}>
-        <Dialog.Title>Email Already Registered</Dialog.Title>
+      <Dialog visible={visible} dismissable onDismiss={onClose} style={styles.dialog}>
+        <Dialog.Title style={styles.title}>Email Already Registered</Dialog.Title>
         <Dialog.Content style={styles.content}>
           <Text style={styles.message}>
             {email ? `"${email}" ` : ''}is already registered. Please sign in.
@@ -35,11 +35,50 @@ export default function EmailExistsDialog({ visible, onClose, onSignIn, email }:
 }
 
 const styles = StyleSheet.create({
-  content: { alignItems: 'center' },
-  message: { fontSize: 16, textAlign: 'center', marginBottom: 16 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
-  btn: { flex: 1, padding: 12, borderRadius: 6, marginHorizontal: 4, alignItems: 'center' },
-  cancel: { backgroundColor: '#ccc' },
-  signIn: { backgroundColor: '#2e86de' },
-  btnText: { color: '#fff', fontWeight: '600' },
+  dialog: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  btn: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 8,
+    marginHorizontal: 6,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  cancel: {
+    backgroundColor: '#f0f0f0',
+  },
+  signIn: {
+    backgroundColor: '#2e86de',
+  },
+  btnText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
 });

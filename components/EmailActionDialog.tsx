@@ -4,9 +4,9 @@ import { Portal, Dialog } from 'react-native-paper';
 
 type Props = {
   visible: boolean;
-  onTimeout: () => void;      // called when countdown ends
-  duration?: number;           // countdown in seconds
-  message?: string;            // custom message
+  onTimeout: () => void;
+  duration?: number;
+  message?: string;
 };
 
 export default function EmailActionDialog({
@@ -17,12 +17,10 @@ export default function EmailActionDialog({
 }: Props) {
   const progress = useRef(new Animated.Value(1)).current;
 
-  // Animate progress bar
   useEffect(() => {
     if (!visible) return;
 
     progress.setValue(1);
-
     Animated.timing(progress, {
       toValue: 0,
       duration: duration * 1000,
@@ -31,24 +29,22 @@ export default function EmailActionDialog({
     }).start(() => setTimeout(() => onTimeout(), 0));
   }, [visible, duration, onTimeout, progress]);
 
-  // Interpolated width
   const width = progress.interpolate({
     inputRange: [0, 1],
     outputRange: ['0%', '100%'],
   });
 
-  // Interpolated color: green → yellow → red
   const backgroundColor = progress.interpolate({
     inputRange: [0, 0.33, 0.66, 1],
-    outputRange: ['#ff4d4d', '#ffb84d', '#ffff4d', '#4dff4d'],
+    outputRange: ['#ff6b6b', '#ffb84d', '#fff44d', '#4dff6b'],
   });
 
   if (!visible) return null;
 
   return (
     <Portal>
-      <Dialog visible={visible} dismissable={false}>
-        <Dialog.Title>Email Action</Dialog.Title>
+      <Dialog visible={visible} dismissable={false} style={styles.dialog}>
+        <Dialog.Title style={styles.title}>Email Action</Dialog.Title>
         <Dialog.Content style={styles.content}>
           <Text style={styles.message}>
             {message || 'Check your email and click the verification link!'}
@@ -65,17 +61,34 @@ export default function EmailActionDialog({
 }
 
 const styles = StyleSheet.create({
-  content: { alignItems: 'center' },
-  message: { fontSize: 16, textAlign: 'center', marginBottom: 16 },
+  dialog: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
   progressContainer: {
     width: '100%',
-    height: 14,
-    backgroundColor: '#ddd',
-    borderRadius: 7,
+    height: 12,
+    backgroundColor: '#eee',
+    borderRadius: 6,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    borderRadius: 7,
+    borderRadius: 6,
   },
 });
