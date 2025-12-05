@@ -8,8 +8,8 @@ import HomeScreen from "../screens/HomeScreen";
 import WorkoutScreen from "../screens/WorkoutScreen";
 import AnalysisScreen from "../screens/AnalysisScreen";
 import ProfileScreen from "../screens/ProfileScreen";
-
 import CurvedTabBar from "../components/CurvedTabBar";
+
 
 
 const Tab = createBottomTabNavigator();
@@ -51,10 +51,13 @@ const TabIcon = ({ name, focused }: TabIconProps) => {
 export default function TabNavigator() {
   return (
     <Tab.Navigator
+    screenOptions={{
+    headerShown: false,
+    tabBarStyle: { display: "none" }, // Hide default bar completely
+  }}
   tabBar={(props) => <CurvedTabBar {...props} />}
-  screenOptions={{ headerShown: false }}
 >
-  <Tab.Screen name="Home" component={HomeScreen} />
+  <Tab.Screen name="HomeTab" component={HomeScreen} />
   <Tab.Screen name="Workout" component={WorkoutScreen} />
   <Tab.Screen name="Analysis" component={AnalysisScreen} />
   <Tab.Screen name="Profile" component={ProfileScreen} />

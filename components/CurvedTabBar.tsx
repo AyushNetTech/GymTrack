@@ -1,57 +1,40 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import Svg, { Path } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 
-const TAB_HEIGHT = 85;
-const CURVE_HEIGHT = 25;
+const TAB_HEIGHT = 60;
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  Home: "home-outline",
+  HomeTab: "home-outline",
   Workout: "barbell-outline",
   Analysis: "analytics-outline",
   Profile: "person-outline",
 };
 
-export default function CurvedTabBar({ state, descriptors, navigation }: any) {
+export default function CurvedTabBar({ state, navigation }: any) {
   return (
-    <View style={styles.container}>
-      <BlurView intensity={70} tint="light" style={styles.blurBg} />
+    <View style={styles.outer}>
+      {/* Blur Background */}
+      <BlurView intensity={10} tint="light" style={styles.inner} />
 
-      <Svg width="100%" height={TAB_HEIGHT} style={styles.svgStyle}>
-        <Path
-          d={`
-            M0 0 
-            L0 ${TAB_HEIGHT - CURVE_HEIGHT}
-            Q${state.routes.length * 50} ${TAB_HEIGHT + CURVE_HEIGHT} ${state.routes.length * 100} ${
-            TAB_HEIGHT - CURVE_HEIGHT
-          }
-            L${state.routes.length * 200} 0 Z
-          `}
-          fill="rgba(255,255,255,0.55)"
-        />
-      </Svg>
-
-      <View style={styles.tabRow}>
+      {/* Icon Row */}
+      <View style={styles.row}>
         {state.routes.map((route: any, index: number) => {
           const isFocused = state.index === index;
-
-          const onPress = () => navigation.navigate(route.name);
-
-          const iconName = ICONS[route.name];
+          const icon = ICONS[route.name];
 
           return (
             <TouchableOpacity
               key={route.key}
-              onPress={onPress}
-              style={styles.tabButton}
+              onPress={() => navigation.navigate(route.name)}
+              style={styles.button}
               activeOpacity={0.7}
             >
               <Ionicons
-                name={iconName}
-                size={28}
-                color={isFocused ? "#2e86de" : "#7f7f7f"}
+                name={icon}
+                size={26}
+                color={isFocused ? "#2e86de" : "#8f8f8f"}
               />
             </TouchableOpacity>
           );
@@ -62,34 +45,34 @@ export default function CurvedTabBar({ state, descriptors, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 25,
     left: 25,
     right: 25,
     height: TAB_HEIGHT,
-    borderRadius: 40,
-    overflow: "hidden",
+    justifyContent: "center",
   },
-  blurBg: {
+
+  inner: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 40,
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Soft frosted glass
+    overflow: "hidden",
   },
-  svgStyle: {
-    position: "absolute",
-    bottom: 0,
-  },
-  tabRow: {
+
+  row: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     alignItems: "center",
     height: TAB_HEIGHT,
-    paddingHorizontal: 35,
+    paddingHorizontal: 20,
   },
-  tabButton: {
+
+  button: {
+    width: 55,
+    height: 55,
     justifyContent: "center",
     alignItems: "center",
-    width: 60,
-    height: 60,
   },
 });
