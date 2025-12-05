@@ -9,6 +9,7 @@ import HomeScreen from './screens/HomeScreen'
 import ResetPasswordScreen from './screens/ResetPasswordScreen'
 import ProfileSetupScreen from './screens/ProfileSetupScreen'
 import { Session } from '@supabase/supabase-js'
+import TabNavigator from "./navigation/TabNavigator";
 
 export type RootStackParamList = {
   Auth: undefined
@@ -134,7 +135,7 @@ export default function App() {
         ) : (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             {session ? (
-              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Home" component={TabNavigator} />
             ) : (
               <Stack.Screen name="Auth" component={AuthScreen} />
             )}
