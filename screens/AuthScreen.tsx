@@ -150,6 +150,7 @@ export default function AuthScreen() {
         {/* Email Input */}
         <TextInput
           style={styles.input}
+          placeholderTextColor="#5a5a5aff"
           placeholder="Email"
           value={email}
           onChangeText={validateEmail}
@@ -162,6 +163,7 @@ export default function AuthScreen() {
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
             placeholder="Password"
+            placeholderTextColor="#5a5a5aff"
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={validatePassword}
@@ -263,6 +265,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     padding: 12,
     borderRadius: 8,
+    
     fontSize: 16,
     marginBottom: 6,
     backgroundColor: '#fafafa',

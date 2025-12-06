@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: "#eee"
   },
   title: {
     fontSize: 20,
