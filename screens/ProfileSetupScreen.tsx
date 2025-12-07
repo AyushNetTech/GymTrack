@@ -114,6 +114,7 @@ const handleSave = async () => {
       <TextInput
         style={styles.input}
         placeholder="First Name"
+        placeholderTextColor="#5a5a5aff"
         value={firstName}
         onChangeText={value => {
           setFirstName(value)
@@ -125,6 +126,7 @@ const handleSave = async () => {
       <TextInput
         style={styles.input}
         placeholder="Last Name"
+        placeholderTextColor="#5a5a5aff"
         value={lastName}
         onChangeText={value => {
           setLastName(value)
@@ -136,6 +138,7 @@ const handleSave = async () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
+        placeholderTextColor="#5a5a5aff"
         value={username}
         onChangeText={value => {
           setUsername(value)
@@ -148,6 +151,7 @@ const handleSave = async () => {
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#5a5a5aff"
         value={phone}
         keyboardType="phone-pad"
         onChangeText={value => {

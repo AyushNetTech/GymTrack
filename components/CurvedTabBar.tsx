@@ -3,8 +3,8 @@ import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 
-const TAB_HEIGHT = 60; // Increased to fit label
-const ICON_SIZE = 26;
+const TAB_HEIGHT = 65; // Increased to fit label
+const ICON_SIZE = 28;
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   HomeTab: "home-outline",
@@ -24,7 +24,7 @@ export default function CurvedTabBar({ state, navigation }: any) {
   return (
     <View style={styles.outer}>
       {/* Blur Background */}
-      <BlurView intensity={10} tint="light" style={styles.inner} />
+      <BlurView intensity={20} tint="light" style={styles.inner} />
 
       {/* Icon Row */}
       <View style={styles.row}>
@@ -43,7 +43,7 @@ export default function CurvedTabBar({ state, navigation }: any) {
               <Ionicons
                 name={icon}
                 size={ICON_SIZE}
-                color={isFocused ? "#69e231ff" : "#8f8f8f"}
+                color={isFocused ? "#d0ff2a" : "#f8f8f8ff"}
               />
 
               {/* Label below icon */}
@@ -59,18 +59,21 @@ export default function CurvedTabBar({ state, navigation }: any) {
 const styles = StyleSheet.create({
   outer: {
     position: "absolute",
-    bottom: 25,
+    bottom: 35,
     left: 40,
     right: 40,
     height: TAB_HEIGHT,
+    
     justifyContent: "center",
   },
 
   inner: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 40,
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    backgroundColor: "rgba(10, 10, 10, 0.95)",
     overflow: "hidden",
+    borderWidth:1,
+    borderColor:"#070707ff"
   },
 
   row: {
@@ -90,8 +93,8 @@ const styles = StyleSheet.create({
 
   label: {
     marginTop: 2, // space below icon
-    fontSize: 10,
-    color: "#69e231ff",
+    fontSize: 11,
+    color: "#d0ff2a",
     fontWeight: "700",
     textAlign: "center",
   },
