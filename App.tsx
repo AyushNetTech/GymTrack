@@ -10,6 +10,8 @@ import ResetPasswordScreen from './screens/ResetPasswordScreen'
 import ProfileSetupScreen from './screens/ProfileSetupScreen'
 import { Session } from '@supabase/supabase-js'
 import TabNavigator from "./navigation/TabNavigator";
+import { ToastProvider } from "./components/ToastProvider";
+
 
 export type RootStackParamList = {
   Auth: undefined
@@ -126,10 +128,15 @@ export default function App() {
   }, [session])
 
   return (
-    <PaperProvider>
-      <NavigationContainer linking={linking} ref={navigationRef} fallback={<></>}>
+  <PaperProvider>
+    <ToastProvider> 
+      <NavigationContainer
+        linking={linking}
+        ref={navigationRef}
+        fallback={<></>}
+      >
         {loading ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <ActivityIndicator size="large" />
           </View>
         ) : (
@@ -139,15 +146,18 @@ export default function App() {
             ) : (
               <Stack.Screen name="Auth" component={AuthScreen} />
             )}
+
             <Stack.Screen
               name="ResetPassword"
               component={ResetPasswordScreen}
-              options={{ presentation: 'modal' }}
+              options={{ presentation: "modal" }}
             />
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
           </Stack.Navigator>
         )}
       </NavigationContainer>
-    </PaperProvider>
-  )
+    </ToastProvider>
+  </PaperProvider>
+);
+
 }

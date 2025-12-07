@@ -70,16 +70,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
+    color:"black"
   },
   content: {
     alignItems: 'center',
     paddingVertical: 16,
+    color:"black"
   },
   message: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#333',
+    color: '#000000ff',
   },
   progressContainer: {
     width: '100%',
