@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Linking, ActivityIndicator, View } from 'react-native'
+import { Alert, Linking, ActivityIndicator, View, StatusBar, Platform  } from 'react-native'
 import { NavigationContainer, LinkingOptions, createNavigationContainerRef } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Provider as PaperProvider } from 'react-native-paper'
@@ -11,6 +11,8 @@ import ProfileSetupScreen from './screens/ProfileSetupScreen'
 import { Session } from '@supabase/supabase-js'
 import TabNavigator from "./navigation/TabNavigator";
 import { ToastProvider } from "./components/ToastProvider";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
 
 
 export type RootStackParamList = {
@@ -38,6 +40,9 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
+  if (Platform.OS === "android") {
+    StatusBar.setTranslucent(false);
+  }
   // Load session
   useEffect(() => {
     const init = async () => {
@@ -128,36 +133,44 @@ export default function App() {
   }, [session])
 
   return (
-  <PaperProvider>
-    <ToastProvider> 
-      <NavigationContainer
-        linking={linking}
-        ref={navigationRef}
-        fallback={<></>}
-      >
-        {loading ? (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <ActivityIndicator size="large" />
-          </View>
-        ) : (
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {session ? (
-              <Stack.Screen name="Home" component={TabNavigator} />
-            ) : (
-              <Stack.Screen name="Auth" component={AuthScreen} />
-            )}
+    <SafeAreaProvider>
+      <PaperProvider>
+        <ToastProvider> 
+          <StatusBar
+            barStyle="light-content"
+            backgroundColor="black"
+            translucent={false}
+          />
 
-            <Stack.Screen
-              name="ResetPassword"
-              component={ResetPasswordScreen}
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-          </Stack.Navigator>
-        )}
-      </NavigationContainer>
-    </ToastProvider>
-  </PaperProvider>
+          <NavigationContainer
+            linking={linking}
+            ref={navigationRef}
+            fallback={<></>}
+          >
+            {loading ? (
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" />
+              </View>
+            ) : (
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
+                {session ? (
+                  <Stack.Screen name="Home" component={TabNavigator} />
+                ) : (
+                  <Stack.Screen name="Auth" component={AuthScreen} />
+                )}
+
+                <Stack.Screen
+                  name="ResetPassword"
+                  component={ResetPasswordScreen}
+                  options={{ presentation: "modal" }}
+                />
+                <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+              </Stack.Navigator>
+            )}
+          </NavigationContainer>
+        </ToastProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
 );
 
 }

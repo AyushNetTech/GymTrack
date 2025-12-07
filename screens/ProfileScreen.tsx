@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Text, Button, ActivityIndicator } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
@@ -129,7 +130,7 @@ export default function ProfileScreen() {
   if (loading) return <LoadingScreen visible={true} />;
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
     <View style={styles.container}>
       {/* SMALL UPLOADING SPINNER */}
       {uploading && (
@@ -165,7 +166,7 @@ export default function ProfileScreen() {
         Sign Out
       </Button>
     </View>
-    </>
+    </SafeAreaView>
   );
 }
 

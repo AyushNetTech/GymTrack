@@ -4,6 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
 import LoadingScreen from "../components/LoadingScreen";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 
 export default function HomeScreen() {
@@ -98,6 +100,7 @@ export default function HomeScreen() {
   const graphHeights = [35, 45, 30, 60, 55, 50, 40];
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
     <View style={styles.container}>
 
       {/* HEADER */}
@@ -236,6 +239,7 @@ export default function HomeScreen() {
       </ScrollView>
       <LoadingScreen visible={loading} />
     </View>
+  </SafeAreaView>
   );
 }
 
@@ -243,11 +247,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
 
   fixedHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 55,
-    paddingBottom: 10,
-    backgroundColor: "#000",
-  },
+  paddingHorizontal: 20,
+  paddingTop: 50,     // FIXED — no more extra gap
+  paddingBottom: 10,
+  backgroundColor: "#000",
+},
+
 
   scrollArea: {
     flex: 1,

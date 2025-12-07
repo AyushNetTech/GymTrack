@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     padding: 12,
     borderRadius: 8,
-    
+    color:"#000",
     fontSize: 16,
     marginBottom: 6,
     backgroundColor: '#fafafa',
@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
+    color:"black",
     marginBottom: 6,
   },
   eyeIcon: {
