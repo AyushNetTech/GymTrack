@@ -1,10 +1,12 @@
-import React from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, TouchableOpacity, Text, Keyboard, Platform, Animated } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const TAB_HEIGHT = 70;
 const ICON_SIZE = 26;
+const DEFAULT_BOTTOM = 35;
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   HomeTab: "home-outline",
@@ -20,48 +22,64 @@ const LABELS: Record<string, string> = {
   Profile: "Profile",
 };
 
-export default function CurvedTabBar({ state, navigation }: any) {
+const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
+  const animatedBottom = useRef(new Animated.Value(DEFAULT_BOTTOM)).current;
 
-  // ⭐ Find AddWorkout index
-  const addWorkoutIndex = state.routes.findIndex(
-    (r: any) => r.name === "AddWorkout"
-  );
+  // Keyboard show/hide animation
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      (e) => {
+        Animated.timing(animatedBottom, {
+          toValue: DEFAULT_BOTTOM + e.endCoordinates.height,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        Animated.timing(animatedBottom, {
+          toValue: DEFAULT_BOTTOM,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+      }
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  // Find AddWorkout index
+  const addWorkoutIndex = state.routes.findIndex((r) => r.name === "AddWorkout");
   const isAddFocused = state.index === addWorkoutIndex;
 
   return (
-    <View style={styles.outer}>
-      
+    <Animated.View style={[styles.outer, { bottom: animatedBottom }]} pointerEvents="box-none">
       {/* Background Blur */}
       <BlurView intensity={20} tint="light" style={styles.inner} />
 
-      {/* ⭐ Floating Center Button */}
+      {/* Floating Center Button */}
       <TouchableOpacity
-        style={[
-          styles.centerButton,
-          isAddFocused && styles.centerButtonActive, // glow when active
-        ]}
+        style={[styles.centerButton, isAddFocused && styles.centerButtonActive]}
         activeOpacity={0.8}
         onPress={() => navigation.navigate("AddWorkout")}
       >
-        <Ionicons
-          name="add"
-          size={34}
-          color={isAddFocused ? "white" : "black"}
-        />
+        <Ionicons name="add" size={34} color={isAddFocused ? "white" : "black"} />
       </TouchableOpacity>
 
       {/* Icon Row */}
       <View style={styles.row}>
-        {state.routes.map((route: any, index: number) => {
-          
-          // ⭐ Invisible placeholder for AddWorkout
-          if (route.name === "AddWorkout") {
-            return <View key={route.key} style={{ width: 60 }} />;
-          }
+        {state.routes.map((route, index) => {
+          if (route.name === "AddWorkout") return <View key={route.key} style={{ width: 60 }} />;
 
           const isFocused = state.index === index;
-          const icon = ICONS[route.name];
-          const label = LABELS[route.name];
+          const icon = ICONS[route.name] ?? "ellipse-outline";
+          const label = LABELS[route.name] ?? "";
 
           return (
             <TouchableOpacity
@@ -70,33 +88,26 @@ export default function CurvedTabBar({ state, navigation }: any) {
               style={styles.button}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name={icon}
-                size={ICON_SIZE}
-                color={isFocused ? "#d0ff2a" : "#f8f8f8ff"}
-              />
-
-              {isFocused && (
-                <Text style={styles.label}>{label}</Text>
-              )}
+              <Ionicons name={icon} size={ICON_SIZE} color={isFocused ? "#d0ff2a" : "#f8f8f8ff"} />
+              {isFocused && <Text style={styles.label}>{label}</Text>}
             </TouchableOpacity>
           );
         })}
       </View>
-    </View>
+    </Animated.View>
   );
-}
+};
+
+export default CurvedTabBar;
 
 const styles = StyleSheet.create({
   outer: {
     position: "absolute",
-    bottom: 35,
     left: 35,
     right: 35,
     height: TAB_HEIGHT,
     justifyContent: "center",
   },
-
   inner: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 40,
@@ -105,21 +116,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#070707ff",
   },
-
   row: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     height: TAB_HEIGHT,
   },
-
   button: {
     width: 51,
     height: TAB_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
   },
-
   label: {
     marginTop: 2,
     fontSize: 11,
@@ -127,8 +135,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textAlign: "center",
   },
-
-  /* ⭐ Floating Center Button */
   centerButton: {
     position: "absolute",
     alignSelf: "center",
@@ -145,8 +151,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 6,
   },
-
-  /* ⭐ Glow when AddWorkout is active */
   centerButtonActive: {
     backgroundColor: "#d0ff2a",
     shadowColor: "#d0ff2a",
