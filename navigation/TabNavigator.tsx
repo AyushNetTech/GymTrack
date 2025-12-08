@@ -8,6 +8,7 @@ import HomeScreen from "../screens/HomeScreen";
 import WorkoutScreen from "../screens/WorkoutScreen";
 import AnalysisScreen from "../screens/AnalysisScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import AddWorkoutScreen from "../screens/AddWorkoutScreen";
 import CurvedTabBar from "../components/CurvedTabBar";
 
 
@@ -59,6 +60,7 @@ export default function TabNavigator() {
 >
   <Tab.Screen name="HomeTab" component={HomeScreen} />
   <Tab.Screen name="Workout" component={WorkoutScreen} />
+  <Tab.Screen name="AddWorkout" component={AddWorkoutScreen} />
   <Tab.Screen name="Analysis" component={AnalysisScreen} />
   <Tab.Screen name="Profile" component={ProfileScreen} />
 </Tab.Navigator>
