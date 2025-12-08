@@ -1,12 +1,19 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, Keyboard, Platform, Animated } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Keyboard,
+  Platform,
+  Animated,
+} from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const TAB_HEIGHT = 70;
 const ICON_SIZE = 26;
-const DEFAULT_BOTTOM = 35;
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   HomeTab: "home-outline",
@@ -23,47 +30,57 @@ const LABELS: Record<string, string> = {
 };
 
 const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
-  const animatedBottom = useRef(new Animated.Value(DEFAULT_BOTTOM)).current;
+  // Translate animation (hide/show)
+  const animatedTranslate = useRef(new Animated.Value(0)).current;
 
-  // Keyboard show/hide animation
   useEffect(() => {
-    const showSub = Keyboard.addListener(
+    const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => {
-        Animated.timing(animatedBottom, {
-          toValue: DEFAULT_BOTTOM + e.endCoordinates.height,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      }
+      () => hideTab()
     );
-    const hideSub = Keyboard.addListener(
+
+    const hide = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => {
-        Animated.timing(animatedBottom, {
-          toValue: DEFAULT_BOTTOM,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      }
+      () => showTab()
     );
 
     return () => {
-      showSub.remove();
-      hideSub.remove();
+      show.remove();
+      hide.remove();
     };
   }, []);
 
-  // Find AddWorkout index
+  const hideTab = () => {
+    Animated.timing(animatedTranslate, {
+      toValue: 150, // fully off screen
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const showTab = () => {
+    Animated.timing(animatedTranslate, {
+      toValue: 0, // normal position
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const addWorkoutIndex = state.routes.findIndex((r) => r.name === "AddWorkout");
   const isAddFocused = state.index === addWorkoutIndex;
 
   return (
-    <Animated.View style={[styles.outer, { bottom: animatedBottom }]} pointerEvents="box-none">
-      {/* Background Blur */}
+    <Animated.View
+      style={[
+        styles.outer,
+        { transform: [{ translateY: animatedTranslate }] },
+      ]}
+      pointerEvents="box-none"
+    >
+      {/* Blur Background */}
       <BlurView intensity={20} tint="light" style={styles.inner} />
 
-      {/* Floating Center Button */}
+      {/* Floating center button */}
       <TouchableOpacity
         style={[styles.centerButton, isAddFocused && styles.centerButtonActive]}
         activeOpacity={0.8}
@@ -72,10 +89,11 @@ const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
         <Ionicons name="add" size={34} color={isAddFocused ? "white" : "black"} />
       </TouchableOpacity>
 
-      {/* Icon Row */}
+      {/* Icons */}
       <View style={styles.row}>
         {state.routes.map((route, index) => {
-          if (route.name === "AddWorkout") return <View key={route.key} style={{ width: 60 }} />;
+          if (route.name === "AddWorkout")
+            return <View key={route.key} style={{ width: 60 }} />;
 
           const isFocused = state.index === index;
           const icon = ICONS[route.name] ?? "ellipse-outline";
@@ -88,7 +106,12 @@ const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
               style={styles.button}
               activeOpacity={0.7}
             >
-              <Ionicons name={icon} size={ICON_SIZE} color={isFocused ? "#d0ff2a" : "#f8f8f8ff"} />
+              <Ionicons
+                name={icon}
+                size={ICON_SIZE}
+                color={isFocused ? "#d0ff2a" : "#f8f8f8ff"}
+              />
+
               {isFocused && <Text style={styles.label}>{label}</Text>}
             </TouchableOpacity>
           );
@@ -105,8 +128,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 35,
     right: 35,
+    bottom: 35,
     height: TAB_HEIGHT,
     justifyContent: "center",
+    zIndex: 999,
   },
   inner: {
     ...StyleSheet.absoluteFillObject,
