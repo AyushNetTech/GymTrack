@@ -34,7 +34,7 @@ export default function AddWorkoutScreen() {
     const { data, error } = await supabase
       .from("workout_categories")
       .select("*")
-      .order("name");
+      .order("id", { ascending: true });
     if (error) console.log(error.message);
     else setCategories(data as Category[]);
     setLoading(false);
@@ -67,28 +67,40 @@ export default function AddWorkoutScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Select Category</Text>
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 15 }}
-      >
-        {categories.map((cat: Category) => (
-          <TouchableOpacity
-            key={cat.id}
-            style={styles.categoryCardWrapper}
-            onPress={() => handleCategorySelect(cat)}
-          >
-            <ImageBackground
-              source={{ uri: cat.image_url || "https://via.placeholder.com/300x100.png" }}
-              style={styles.categoryCard}
-              imageStyle={{ borderRadius: 12 }}
-            >
-              <View style={styles.categoryOverlay}>
-                <Text style={styles.categoryText}>{cat.name}</Text>
-              </View>
-            </ImageBackground>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 15 }}
+        >
+          {categories.map((cat: Category) => {
+            const isSelected = selectedCategory?.id === cat.id;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => handleCategorySelect(cat)}
+                activeOpacity={0.9}
+              >
+                <View
+                  style={[
+                    styles.categoryCardWrapper,
+                    isSelected && styles.selectedCategoryWrapper, // full border now
+                  ]}
+                >
+                  <ImageBackground
+                    source={{ uri: cat.image_url || "https://via.placeholder.com/300x100.png" }}
+                    style={styles.categoryCard}
+                    imageStyle={{ borderRadius: 12 }}
+                  >
+                    <View style={styles.categoryOverlay}>
+                      <Text style={styles.categoryText}>{cat.name}</Text>
+                    </View>
+                  </ImageBackground>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+
+        </ScrollView>
+
 
       {selectedCategory && (
         <>
@@ -125,7 +137,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000", paddingTop: 20 },
   heading: { color: "#d0ff2a", fontSize: 20, fontWeight: "bold", marginBottom: 12, marginLeft: 15 },
 
-  categoryCardWrapper: { marginRight: 15, marginBottom: 20 },
+  categoryCardWrapper: {
+  marginRight: 15,
+  marginBottom: 40,
+  borderRadius: 12, // important
+  overflow: 'hidden', // ensures inner image doesn't cover border
+  borderWidth: 0, // default
+  borderColor: 'transparent',
+},
+
   categoryCard: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
@@ -142,10 +162,10 @@ const styles = StyleSheet.create({
 
   exerciseButton: {
     width: EXERCISE_WIDTH,
-    height: 50,
+    height: 60,
     margin: 8,
     borderRadius: 12,
-    backgroundColor: "#111",
+    backgroundColor: "#242424ff",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#d0ff2a",
@@ -154,5 +174,22 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  exerciseText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  exerciseText: { 
+    color: "#fff", 
+    fontWeight: "bold", 
+    fontSize: 16, 
+    textAlign:"center",
+    paddingLeft:10,
+    paddingRight:10
+  },
+  selectedCategoryWrapper: {
+  borderWidth: 2,
+  borderColor: '#d0ff2a',
+  borderRadius: 12,
+},
+
+selectedCategoryCard: {
+  opacity: 1, // keep fully visible
+},
+
 });
