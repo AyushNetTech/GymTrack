@@ -131,26 +131,22 @@ export default function HomeScreen() {
         <View style={styles.weekRow}>
           {weekDates.map((item, index) => (
             <View key={index} style={styles.weekItem}>
-              <Text style={styles.weekDay}>{item.day}</Text>
+              {item.isToday ? (
+                <View style={styles.todayWrapper}>
+                  <Text style={styles.todayDay}>{item.day}</Text>
+                  <Text style={styles.todayDate}>{item.date}</Text>
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.weekDay}>{item.day}</Text>
+                  <Text style={styles.weekDate}>{item.date}</Text>
+                </>
+              )}
 
-              <View
-                style={[
-                  styles.dateBubble,
-                  item.isToday && styles.dateBubbleActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.dateText,
-                    item.isToday && styles.dateTextActive,
-                  ]}
-                >
-                  {item.date}
-                </Text>
-              </View>
             </View>
           ))}
         </View>
+
       </View>
 
       {/* SCROLL CONTENT */}
@@ -290,22 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
-  // WEEK
-  weekRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 18,
-  },
-
-  weekItem: {
-    alignItems: "center",
-  },
-
-  weekDay: {
-    color: "#999",
-    fontSize: 12,
-    marginBottom: 4,
-  },
 
   dateBubble: {
     width: 36,
@@ -333,7 +313,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "700",
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 10,
   },
 
@@ -486,4 +466,64 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     padding: 10,
   },
+  todayBox: {
+  backgroundColor: "#d0ff2a",
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+  borderRadius: 14,
+},
+
+todayText: {
+  color: "#000",
+  fontSize: 14,
+  fontWeight: "700",
+},
+
+weekRow: {
+  flexDirection: "row",
+  justifyContent: "space-around",   // better spacing than space-between
+  marginTop: 20,
+  height: 60,
+  alignItems:"center"
+},
+
+weekItem: {
+  alignItems: "center",
+  width: 45,                        // makes items wider & more balanced
+},
+
+weekDay: {
+  color: "#999",
+  fontSize: 14,
+  marginBottom: 5,
+},
+
+weekDate: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "700",
+},
+
+todayWrapper: {
+  width: 48,                        // was 36 → bigger
+  height: 60,                       // was 48 → taller
+  backgroundColor: "#d0ff2a",
+  borderRadius: 16,                 // smoother rounded rectangle
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+todayDay: {
+  color: "#000",
+  fontSize: 14,
+  fontWeight: "700",
+  marginBottom: 4,
+},
+
+todayDate: {
+  color: "#000",
+  fontSize: 16,
+  fontWeight: "800",
+},
+
 });
