@@ -330,21 +330,6 @@ const styles = StyleSheet.create({
     top: 16,
   },
 
-  bigBtn: {
-    alignSelf: "center",
-    width: 75,
-    height: 75,
-    borderRadius: 50,
-    backgroundColor: "#3c39ff",
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 25,
-    shadowColor: "#3c39ff",
-    shadowOpacity: 0.9,
-    shadowRadius: 25,
-    shadowOffset: { width: 0, height: 10 },
-  },
-
   forgot: {
     textAlign: "center",
     color: "#4ab4ff",
@@ -361,7 +346,7 @@ const styles = StyleSheet.create({
   width: 70,
   height: 70,
   transform: [{ rotate: "45deg" }],
-  backgroundColor: "#d0ff2a",
+  backgroundColor: "#f4ff47",
 
   justifyContent: "center",
   alignItems: "center",
