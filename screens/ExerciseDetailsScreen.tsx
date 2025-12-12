@@ -96,8 +96,8 @@ export default function ExerciseDetailsScreen({ route, navigation }: any) {
         style={{ flexDirection: 'row', alignItems: 'center',  paddingBottom:20 }}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back-outline" size={24} color="#d0ff2a" />
-        <Text style={{ color: '#d0ff2a', fontSize: 18, marginLeft: 8 }}>Back</Text>
+        <Ionicons name="arrow-back-outline" size={24} color="#f4ff47" />
+        <Text style={{ color: '#f4ff47', fontSize: 18, marginLeft: 8 }}>Back</Text>
       </TouchableOpacity>
       <Text style={styles.heading}>{exercise.name}</Text>
     </View>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#555',
     marginHorizontal: 2,
   },
-  unitButtonActive: { backgroundColor: '#d0ff2a' },
+  unitButtonActive: { backgroundColor: '#f4ff47' },
   unitText: { color: '#fff', fontWeight: 'bold' },
   addButton: {
     backgroundColor: '#32CD32',

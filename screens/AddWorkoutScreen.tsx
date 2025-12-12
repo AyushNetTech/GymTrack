@@ -163,7 +163,7 @@ const EXERCISE_WIDTH = width * 0.42;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000", paddingTop: 20 },
-  heading: { color: "#d0ff2a", fontSize: 20, fontWeight: "bold", marginBottom: 12, marginLeft: 15 },
+  heading: { color: "#f4ff47", fontSize: 20, fontWeight: "bold", marginBottom: 12, marginLeft: 15 },
 
   categoryCardWrapper: {
     marginRight: 15,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   selectedCategoryWrapper: {
     borderWidth: 2,
-    borderColor: "#d0ff2a",
+    borderColor: "#f4ff47",
     borderRadius: 12,
   },
   categoryCard: {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#202020ff",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#d0ff2a",
+    shadowColor: "#f4ff47",
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,

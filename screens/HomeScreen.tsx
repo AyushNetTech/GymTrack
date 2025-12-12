@@ -161,7 +161,7 @@ export default function HomeScreen() {
         <View style={styles.activityContainer}>
           <View style={styles.stepsCard}>
             <View style={styles.stepsHeader}>
-              <Ionicons name="walk-outline" size={18} color="#d0ff2a" />
+              <Ionicons name="walk-outline" size={18} color="#f4ff47" />
               <Text style={styles.stepsTitle}>Steps</Text>
             </View>
 
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
 
   dateBubbleActive: {
-    backgroundColor: "#d0ff2a",
+    backgroundColor: "#f4ff47",
   },
 
   dateText: {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
 
   graphBar: {
     width: 12,
-    backgroundColor: "#d0ff2a",
+    backgroundColor: "#f4ff47",
     borderRadius: 6,
   },
 
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   todayBox: {
-  backgroundColor: "#d0ff2a",
+  backgroundColor: "#f4ff47",
   paddingHorizontal: 14,
   paddingVertical: 8,
   borderRadius: 14,
@@ -507,7 +507,7 @@ weekDate: {
 todayWrapper: {
   width: 48,                        // was 36 → bigger
   height: 60,                       // was 48 → taller
-  backgroundColor: "#d0ff2a",
+  backgroundColor: "#f4ff47",
   borderRadius: 16,                 // smoother rounded rectangle
   justifyContent: "center",
   alignItems: "center",

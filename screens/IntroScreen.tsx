@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -44,13 +45,15 @@ export default function IntroScreen({ navigation }: any) {
     setCurrentIndex(index);
   };
 
-  const goToNext = () => {
+ const goToNext = async () => {
     if (currentIndex < slides.length - 1) {
       flatListRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
+      await AsyncStorage.setItem("hasSeenIntro", "true");
       navigation.replace("Auth");
     }
   };
+
 
   const renderItem = ({ item }: any) => {
     return (

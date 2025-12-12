@@ -15,7 +15,7 @@ import { emitter } from "../lib/emitter";
 import LoadingScreen from "../components/LoadingScreen";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useToast } from "../components/ToastProvider";
-
+import { navigationRef } from '../App'; // import your navigationRef
 
 
 export default function ProfileScreen() {
@@ -159,12 +159,22 @@ export default function ProfileScreen() {
       </Text>
 
       <Button
-        mode="contained"
-        style={{ marginTop: 20 }}
-        onPress={() => supabase.auth.signOut()}
-      >
-        Sign Out
-      </Button>
+  mode="contained"
+  style={{ marginTop: 20 }}
+  onPress={async () => {
+    await supabase.auth.signOut();
+
+    // Reset navigation to Intro or Auth
+    if (navigationRef.isReady()) {
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: 'Intro' }], // or 'Auth' if you want
+      });
+    }
+  }}
+>
+  Sign Out
+</Button>
     </View>
     </SafeAreaView>
   );
@@ -221,7 +231,7 @@ const styles = StyleSheet.create({
   width: 36,
   height: 36,
   borderRadius: 18,
-  backgroundColor: "#d0ff2a",
+  backgroundColor: "#f4ff47",
   position: "absolute",
   bottom: 6,
   right: 6,

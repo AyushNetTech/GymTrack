@@ -109,7 +109,7 @@ const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
               <Ionicons
                 name={icon}
                 size={ICON_SIZE}
-                color={isFocused ? "#d0ff2a" : "#f8f8f8ff"}
+                color={isFocused ? "#f4ff47" : "#f8f8f8ff"}
               />
 
               {isFocused && <Text style={styles.label}>{label}</Text>}
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 2,
     fontSize: 11,
-    color: "#d0ff2a",
+    color: "#f4ff47",
     fontWeight: "700",
     textAlign: "center",
   },
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 30,
-    backgroundColor: "#d0ff2a",
+    backgroundColor: "#f4ff47",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   centerButtonActive: {
-    backgroundColor: "#d0ff2a",
-    shadowColor: "#d0ff2a",
+    backgroundColor: "#f4ff47",
+    shadowColor: "#f4ff47",
     shadowOpacity: 0.9,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },

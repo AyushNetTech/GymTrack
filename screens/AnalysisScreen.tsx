@@ -115,7 +115,7 @@ export default function AnalysisScreen() {
   if (loading)
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#d0ff2a" />
+        <ActivityIndicator size="large" color="#f4ff47" />
       </View>
     );
 
@@ -148,11 +148,11 @@ export default function AnalysisScreen() {
             backgroundGradientTo: "#111111",
             decimalPlaces: 0,
             color: (opacity = 1, index?: number) => {
-              const colors = ["#d0ff2a", "#ff0080", "#00c0ff"];
+              const colors = ["#f4ff47", "#ff0080", "#00c0ff"];
               return colors[index || 0];
             },
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            propsForDots: { r: "5", strokeWidth: "2", stroke: "#d0ff2a" },
+            propsForDots: { r: "5", strokeWidth: "2", stroke: "#f4ff47" },
             propsForBackgroundLines: { stroke: "rgba(255,255,255,0.1)" },
           }}
           bezier
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#d0ff2a",
+    color: "#f4ff47",
     marginLeft: 15,
     marginBottom: 10,
   },
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#222",
   },
-  filterButtonActive: { backgroundColor: "#d0ff2a" },
+  filterButtonActive: { backgroundColor: "#f4ff47" },
   filterText: { color: "#fff", fontWeight: "bold" },
   filterTextActive: { color: "#000" },
   statsContainer: {
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: width / 3.2,
   },
-  statValue: { fontSize: 20, fontWeight: "bold", color: "#d0ff2a" },
+  statValue: { fontSize: 20, fontWeight: "bold", color: "#f4ff47" },
   statLabel: { fontSize: 14, color: "#fff", marginTop: 5 },
   loading: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" },
 });

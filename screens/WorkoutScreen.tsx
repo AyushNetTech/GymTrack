@@ -87,7 +87,7 @@ export default function WorkoutScreen() {
                     paddingHorizontal: 18,
                     paddingVertical: 10,
                     borderRadius: 20,
-                    backgroundColor: active ? "#d0ff2a" : "#1c1c1e",
+                    backgroundColor: active ? "#f4ff47" : "#1c1c1e",
                     marginRight: 10,
                   }}
                 >
