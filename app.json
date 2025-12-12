@@ -17,7 +17,7 @@
       "style": "dark",
       "backgroundColor": "#fff"
     },
-    "ios":{
+    "ios": {
       "supportsTablet": true
     },
     "android": {
@@ -48,9 +48,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "319b78ec-c208-42df-abae-ee63194a0953"
+        "projectId": "d302e0ed-04fa-4930-bae3-5daff1344f07"
       }
     },
-    "owner": "ayushupase369"
+    "owner": "ayushupasetech"
   }
 }
