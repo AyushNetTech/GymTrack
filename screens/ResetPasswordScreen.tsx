@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { View, TextInput, Alert, StyleSheet, Button, Text, Linking, TouchableOpacity } from 'react-native'
+import { 
+  View, 
+  TextInput, 
+  Alert, 
+  StyleSheet, 
+  Text, 
+  Linking, 
+  TouchableOpacity, 
+  Image, 
+  ActivityIndicator 
+} from 'react-native'
 import { supabase } from '../lib/supabase'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
@@ -30,24 +40,19 @@ export default function ResetPasswordScreen() {
         access = access || hashParams.get('access_token')
         refresh = refresh || hashParams.get('refresh_token')
       }
-
-      
       return { accessToken: access, refreshToken: refresh }
-    } catch (err: any) {
-      
+    } catch {
       return { accessToken: null, refreshToken: null }
     }
   }
 
   useEffect(() => {
     const handleUrl = (url: string | null) => {
-      
       const { accessToken, refreshToken } = parseTokensFromUrl(url)
       if (accessToken && refreshToken) {
         setAccessToken(accessToken)
         setRefreshToken(refreshToken)
         setReady(true)
-        
       }
     }
 
@@ -69,7 +74,6 @@ export default function ResetPasswordScreen() {
     if (!accessToken || !refreshToken) return Alert.alert('Error', 'Missing access or refresh token')
 
     setLoading(true)
-    
 
     const { error: sessionError } = await supabase.auth.setSession({
       access_token: accessToken,
@@ -81,14 +85,9 @@ export default function ResetPasswordScreen() {
       return Alert.alert('Error', sessionError.message)
     }
 
-   
-
     const { error: updateError } = await supabase.auth.updateUser({ password })
     setLoading(false)
-
     if (updateError) return Alert.alert('Error', updateError.message)
-
-    
 
     navigation.reset({
       index: 0,
@@ -99,59 +98,138 @@ export default function ResetPasswordScreen() {
   if (!ready) {
     return (
       <View style={styles.container}>
-        <Text style={styles.waitingText}>Waiting for password reset link...</Text>
+        <Text style={{ color: "#fff", fontSize: 18 }}>Waiting for password reset link...</Text>
       </View>
     )
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.input}
-          placeholder="New Password"
-          placeholderTextColor="#5a5a5aff"
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
-          <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#666" />
+      {/* Background */}
+      <Image source={require("../assets/fitness1.jpg")} style={styles.bgImage} />
+      <View style={styles.overlay} />
+
+      {/* Glass Card */}
+      <View style={styles.card}>
+        <Text style={styles.title}>Reset</Text>
+        <Text style={styles.subtitle}>your password</Text>
+
+        {/* Password Input */}
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[
+              styles.input,
+              password.length > 0 && password.length < 6 && styles.inputError
+            ]}
+            placeholder="New Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#ccc" />
+          </TouchableOpacity>
+        </View>
+
+        {password.length > 0 && password.length < 6 && (
+          <Text style={styles.errorText}>Password must be at least 6 characters</Text>
+        )}
+
+        {/* Confirm Password */}
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[
+              styles.input,
+              confirmPassword.length > 0 && confirmPassword !== password && styles.inputError
+            ]}
+            placeholder="Confirm Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry={!showConfirm}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowConfirm(!showConfirm)}>
+            <Ionicons name={showConfirm ? 'eye-off' : 'eye'} size={22} color="#ccc" />
+          </TouchableOpacity>
+        </View>
+
+        {confirmPassword.length > 0 && confirmPassword !== password && (
+          <Text style={styles.errorText}>Passwords do not match</Text>
+        )}
+
+        {/* Kite Button */}
+        <TouchableOpacity style={styles.kiteButton} onPress={updatePassword} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Ionicons
+              name="checkmark-sharp"
+              size={28}
+              color="#000"
+              style={styles.kiteButtonIcon}
+            />
+
+          )}
         </TouchableOpacity>
       </View>
-
-      {password.length > 0 && password.length < 6 && (
-        <Text style={styles.validationText}>Password must be at least 6 characters</Text>
-      )}
-
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          placeholderTextColor="#5a5a5aff"
-          secureTextEntry={!showConfirm}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowConfirm(!showConfirm)}>
-          <Ionicons name={showConfirm ? 'eye-off' : 'eye'} size={22} color="#666" />
-        </TouchableOpacity>
-      </View>
-
-      {confirmPassword.length > 0 && confirmPassword !== password && (
-        <Text style={styles.validationText}>Passwords do not match</Text>
-      )}
-
-      <Button title={loading ? 'Updating...' : 'Update Password'} onPress={updatePassword} disabled={loading} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  inputWrapper: { position: 'relative', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, paddingRight: 40, borderRadius: 6 },
-  eyeIcon: { position: 'absolute', right: 10, top: 14 },
-  validationText: { color: 'red', marginBottom: 10, fontSize: 13 },
-  waitingText: { textAlign: 'center', fontSize: 16, color: '#555' },
+  container: { flex: 1, justifyContent: "center", backgroundColor: "#000" },
+
+  bgImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
+
+  card: {
+    marginHorizontal: 20,
+    padding: 26,
+    borderRadius: 22,
+    backgroundColor: "rgba(20,20,20,0.65)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+
+  title: { color: "#fff", fontSize: 32, fontWeight: "700" },
+  subtitle: { color: "#ccc", fontSize: 20, marginBottom: 25 },
+
+  inputWrapper: { position: "relative", marginBottom: 12 },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    color: "#fff",
+    paddingRight: 40,
+  },
+
+  eyeIcon: { position: "absolute", right: 14, top: 16 },
+
+  errorText: { color: "#ff4d4d", fontSize: 13, marginBottom: 10 },
+
+  inputError: {
+    borderColor: "#ff4d4d",
+    backgroundColor: "rgba(255, 77, 77, 0.15)",
+  },
+
+  kiteButton: {
+    width: 70,
+    height: 70,
+    backgroundColor: "#d0ff2a",
+    transform: [{ rotate: "45deg" }],
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+    alignSelf: "center",
+    marginTop: 25,
+    shadowColor: "#d0ff2a",
+    shadowOpacity: 0.8,
+    shadowRadius: 18,
+  },
+
+  kiteButtonIcon: { transform: [{ rotate: "-45deg" }] },
 })

@@ -12,7 +12,7 @@ import LoadingScreen from "../components/LoadingScreen"; // your existing loader
 
 const { width } = Dimensions.get("window");
 
-const categories = ["Cardio", "Yoga", "Aerobic", "Stretching", "Strength"];
+const categories = ["Full Body", "Cardio", "Chest", "Stretching", "Strength"];
 
 const workouts = [
   { id: "1", title: "10-Min HIIT Cardio", duration: "22 min", img: "https://picsum.photos/400/600?1" },
