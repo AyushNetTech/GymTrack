@@ -22,7 +22,7 @@ const workouts = [
 ];
 
 export default function WorkoutScreen() {
-  const [selectedCategory, setSelectedCategory] = useState("Cardio");
+  const [selectedCategory, setSelectedCategory] = useState("Full Body");
   const [loading, setLoading] = useState(true);
 
   // Simulate loading for demonstration
