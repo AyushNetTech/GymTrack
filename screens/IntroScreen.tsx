@@ -1,17 +1,16 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useRef, useState } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   FlatList,
   Animated,
   Dimensions,
 } from "react-native";
+import { BlurView } from "expo-blur";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const slides = [
   {
@@ -36,54 +35,68 @@ const slides = [
 
 export default function IntroScreen({ navigation }: any) {
   const scrollX = useRef(new Animated.Value(0)).current;
-  const flatListRef = useRef<any>(null);
+  const flatListRef = useRef<FlatList<any>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleScroll = (event: any) => {
-    const offset = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offset / width);
-    setCurrentIndex(index);
+  const handleScroll = (e: any) => {
+    setCurrentIndex(Math.round(e.nativeEvent.contentOffset.x / width));
   };
 
- const goToNext = async () => {
+  const goToNext = () => {
     if (currentIndex < slides.length - 1) {
-      flatListRef.current.scrollToIndex({ index: currentIndex + 1 });
+      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      await AsyncStorage.setItem("hasSeenIntro", "true");
       navigation.replace("Auth");
     }
   };
 
+  const skipToEnd = () => {
+    flatListRef.current?.scrollToIndex({
+      index: slides.length - 1,
+      animated: true,
+    });
+  };
 
-  const renderItem = ({ item }: any) => {
+  const renderItem = ({ item, index }: any) => {
+    const translateX = scrollX.interpolate({
+      inputRange: [(index - 1) * width, index * width, (index + 1) * width],
+      outputRange: [-50, 0, 50],
+      extrapolate: "clamp",
+    });
+
+    const opacity = scrollX.interpolate({
+      inputRange: [(index - 0.5) * width, index * width, (index + 0.5) * width],
+      outputRange: [0, 1, 0],
+      extrapolate: "clamp",
+    });
+
     return (
       <View style={styles.slide}>
-
-        {/* Background */}
-        <Image source={item.image} style={styles.bg} />
+        <Animated.Image
+          source={item.image}
+          style={[styles.bg, { transform: [{ translateX }] }]}
+          resizeMode="cover"
+        />
         <View style={styles.overlay} />
 
-        {/* Content */}
-        <View style={styles.textContainer}>
+        <Animated.View style={[styles.textContainer, { opacity }]}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.quote}>{item.quote}</Text>
-        </View>
-
+        </Animated.View>
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
-
       <FlatList
-        data={slides}
         ref={flatListRef}
-        keyExtractor={(item) => item.id}
+        data={slides}
         renderItem={renderItem}
+        keyExtractor={(item) => item.id}
         horizontal
-        showsHorizontalScrollIndicator={false}
         pagingEnabled
+        showsHorizontalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: false }
@@ -91,50 +104,56 @@ export default function IntroScreen({ navigation }: any) {
         onMomentumScrollEnd={handleScroll}
       />
 
-      {/* Dots Indicator */}
+      {/* Dots */}
       <View style={styles.dotsContainer}>
-        {slides.map((_, i) => {
-          const opacity = scrollX.interpolate({
-            inputRange: [
-              (i - 1) * width,
-              i * width,
-              (i + 1) * width,
-            ],
-            outputRange: [0.3, 1, 0.3],
-            extrapolate: "clamp",
-          });
-
-          return <Animated.View key={i} style={[styles.dot, { opacity }]} />;
-        })}
+        {slides.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              { opacity: currentIndex === i ? 1 : 0.3 },
+            ]}
+          />
+        ))}
       </View>
 
-      {/* Next Button */}
-      <TouchableOpacity style={styles.nextButton} onPress={goToNext}>
-        <Text style={styles.nextText}>
-          {currentIndex === slides.length - 1 ? "Get Started" : "Next"}
-        </Text>
-      </TouchableOpacity>
+      {/* Buttons */}
+      <View style={styles.bottomContainer}>
+        {currentIndex < slides.length - 1 ? (
+          <View style={styles.row}>
+            <BlurView intensity={100} tint="dark" style={styles.skipBtn}>
+              <TouchableOpacity style={styles.btn} onPress={skipToEnd}>
+                <Text style={styles.skipText}>Skip</Text>
+              </TouchableOpacity>
+            </BlurView>
 
+            <BlurView intensity={0} tint="light" style={styles.nextBtn}>
+              <TouchableOpacity style={styles.btn} onPress={goToNext}>
+                <Text style={styles.nextText}>Next →</Text>
+              </TouchableOpacity>
+            </BlurView>
+          </View>
+        ) : (
+          <BlurView intensity={0} tint="light" style={styles.getStartedBtn}>
+            <TouchableOpacity style={styles.btn} onPress={goToNext}>
+              <Text style={styles.nextText}>Get Started</Text>
+            </TouchableOpacity>
+          </BlurView>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
+  container: { flex: 1, backgroundColor: "#000" },
 
-  slide: {
-    width,
-    height: "100%",
-    justifyContent: "flex-end",
-  },
+  slide: { width, height },
 
   bg: {
-    ...StyleSheet.absoluteFillObject,
-    width: "100%",
-    height: "100%",
+    width,
+    height,
+    position: "absolute",
   },
 
   overlay: {
@@ -143,8 +162,13 @@ const styles = StyleSheet.create({
   },
 
   textContainer: {
+    position: "absolute",
+    bottom:160,
     paddingHorizontal: 20,
-    marginBottom: 50,
+    alignItems:"flex-start",
+    justifyContent:"flex-start",
+    // backgroundColor:"red",
+    height:120
   },
 
   title: {
@@ -154,18 +178,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  quote: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "400",
-    opacity: 0.9,
+  quote: { color: "#fff", fontSize: 18, opacity: 0.9 
+
   },
 
   dotsContainer: {
+    position: "absolute",
+    bottom: 150,
     flexDirection: "row",
     alignSelf: "center",
-    position: "absolute",
-    bottom: 110,
   },
 
   dot: {
@@ -176,18 +197,61 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
   },
 
-  nextButton: {
-    backgroundColor: "#f4ff47",
-    paddingVertical: 16,
-    marginHorizontal: 20,
-    borderRadius: 40,
+  bottomContainer: {
+    position: "absolute",
+    bottom: 45,
+    width: "100%",
+    paddingHorizontal: 30,
+  },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  btn: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 40,
+  },
+
+  skipText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
   },
 
   nextText: {
     fontSize: 18,
     fontWeight: "700",
     color: "#000",
+  },
+
+  skipBtn: {
+  width: "48%",
+  height: 54,
+  borderRadius: 30,
+  overflow: "hidden",
+  borderWidth: 2,
+  borderColor: "rgba(255,255,255,0.35)",
+  shadowColor: "#fff",
+  shadowOpacity: 0.15,
+  shadowRadius: 6,
+},
+
+  nextBtn: {
+    width: "48%",
+    height: 54,
+    borderRadius: 30,
+    overflow: "hidden",
+    backgroundColor: "#f4ff47",
+  },
+
+  getStartedBtn: {
+    width: "100%",
+    height: 54,
+    borderRadius: 30,
+    overflow: "hidden",
+    backgroundColor: "#f4ff47",
   },
 });

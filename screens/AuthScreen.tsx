@@ -27,13 +27,14 @@ export default function AuthScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [emailDialogMessage, setEmailDialogMessage] = useState('');
   const [showExistsDialog, setShowExistsDialog] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
 
   // ---------------------------
   // VALIDATION FUNCTIONS
@@ -70,6 +71,33 @@ export default function AuthScreen({ navigation }: Props) {
     }
 
     setPasswordError('');
+
+    // ✅ Only update confirm-password error WITHOUT resetting state
+    if (confirmPassword && value !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+    } else {
+      setConfirmPasswordError('');
+    }
+
+    return true;
+  };
+
+
+
+  const validateConfirmPassword = (value: string) => {
+    setConfirmPassword(value);
+
+    if (!value) {
+      setConfirmPasswordError('Confirm password is required');
+      return false;
+    }
+
+    if (value !== password) {
+      setConfirmPasswordError('Passwords do not match');
+      return false;
+    }
+
+    setConfirmPasswordError('');
     return true;
   };
 
@@ -107,7 +135,9 @@ export default function AuthScreen({ navigation }: Props) {
   async function signUp() {
     const validEmail = validateEmail(email);
     const validPass = validatePassword(password);
-    if (!validEmail || !validPass) return;
+    const validConfirm = validateConfirmPassword(confirmPassword);
+
+    if (!validEmail || !validPass || !validConfirm) return;
 
     setLoading(true);
 
@@ -131,6 +161,7 @@ export default function AuthScreen({ navigation }: Props) {
     );
     setShowEmailDialog(true);
   }
+
 
   // ---------------------------
   // RESET PASSWORD
@@ -162,8 +193,8 @@ export default function AuthScreen({ navigation }: Props) {
       <View style={styles.overlay} />
 
       <View style={styles.card}>
-        <Text style={styles.title}>{isSignUp ? 'Sign up' : 'Welcome'}</Text>
-        <Text style={styles.subtitle}>{isSignUp ? 'to start' : 'back'}</Text>
+        <Text style={styles.title}>{isSignUp ? 'Sign Up' : 'Welcome'}</Text>
+        <Text style={styles.subtitle}>{isSignUp ? 'Create New Account' : 'back'}</Text>
 
         <TextInput
           style={[styles.input, emailError && styles.inputError]}
@@ -189,6 +220,39 @@ export default function AuthScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
         {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+        {isSignUp && (
+          <>
+            <View style={styles.passwordWrapper}>
+              <TextInput
+                style={[
+                  styles.input,
+                  { flex: 1, marginBottom: 0 },
+                  confirmPasswordError && styles.inputError,
+                ]}
+                placeholder="Confirm Password"
+                placeholderTextColor="#aaa"
+                secureTextEntry={!showPassword}
+                value={confirmPassword}
+                onChangeText={validateConfirmPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={22}
+                  color="#ccc"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {confirmPasswordError ? (
+              <Text style={styles.errorText}>{confirmPasswordError}</Text>
+            ) : null}
+          </>
+        )}
+
 
         <TouchableOpacity style={styles.kiteButton} onPress={isSignUp ? signUp : signIn} disabled={loading}>
           {loading ? (
@@ -204,11 +268,20 @@ export default function AuthScreen({ navigation }: Props) {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
+        <TouchableOpacity
+          onPress={() => {
+            setIsSignUp(!isSignUp);
+            setConfirmPassword('');
+            setConfirmPasswordError('');
+            setPasswordError('');
+            setEmailError('');
+          }}
+        >
           <Text style={styles.switch}>
             {isSignUp ? 'Already have an account? Sign In' : 'Don’t have an account? Sign Up'}
           </Text>
         </TouchableOpacity>
+
       </View>
 
       <EmailActionDialog
