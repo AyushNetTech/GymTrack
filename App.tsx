@@ -67,7 +67,7 @@ export default function App() {
   // Handle auth callback
   // -----------------------
   const handleAuthCallback = async (url: string) => {
-  
+  setHandlingCallback(true); // 🔒 lock UI immediately
 
   let access_token = null;
   let refresh_token = null;
@@ -91,7 +91,7 @@ export default function App() {
   }
 
   if (!access_token || !refresh_token) {
-    
+    setHandlingCallback(false);
     return;
   }
 
@@ -104,6 +104,7 @@ export default function App() {
 
   if (error) {
     Alert.alert("Session error", error.message);
+    setHandlingCallback(false);
     return;
   }
 
@@ -115,6 +116,8 @@ export default function App() {
       routes: [{ name: "ProfileSetup" }],
     });
   }
+
+  setHandlingCallback(false); // 🔓 unlock after navigation
 };
 
 
@@ -175,19 +178,27 @@ export default function App() {
     checkProfile();
   }, [session, handlingCallback]);
 
-  if (loading) {
-    return (
-      <SafeAreaProvider>
-        <PaperProvider>
-          <ToastProvider>
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <ActivityIndicator size="large" />
-            </View>
-          </ToastProvider>
-        </PaperProvider>
-      </SafeAreaProvider>
-    );
-  }
+  if (loading || handlingCallback) {
+  return (
+    <SafeAreaProvider>
+      <PaperProvider>
+        <ToastProvider>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#000",
+            }}
+          >
+            <ActivityIndicator size="large" color="#f4ff47" />
+          </View>
+        </ToastProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
+  );
+}
+
 
   return (
     <SafeAreaProvider>
