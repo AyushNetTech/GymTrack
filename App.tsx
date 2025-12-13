@@ -6,7 +6,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { supabase } from './lib/supabase';
 import AuthScreen from './screens/AuthScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
-import ProfileSetupScreen from './screens/ProfileSetupScreen';
+import ProfileSetupScreen from './screens/ProfileSetupScreen/ProfileSetupScreen';
 import { Session } from '@supabase/supabase-js';
 import TabNavigator from "./navigation/TabNavigator";
 import { ToastProvider } from "./components/ToastProvider";

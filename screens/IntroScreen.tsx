@@ -17,7 +17,7 @@ const slides = [
     id: "1",
     title: "BE HEALTHY",
     quote: "Your body deserves the best version of you.",
-    image: require("../assets/intro4.jpg"),
+    image: require("../assets/intro1.png"),
   },
   {
     id: "2",
