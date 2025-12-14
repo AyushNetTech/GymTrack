@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
   Image,
@@ -12,25 +11,29 @@ import {
   TextInput,
   StatusBar,
   ImageBackground,
+  SafeAreaView,
 } from 'react-native';
-import { supabase } from "../../lib/supabase";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { supabase } from '../../lib/supabase';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
 
 const PRIMARY = '#f4ff47';
 const BG = '#000';
-
 const { width, height } = Dimensions.get('window');
-const GAP = 14;
+const GAP = 20;
 const BOX_SIZE = (width - GAP * 3) / 2;
+const ITEM_HEIGHT = 50;
+const DEFAULT_HEIGHT = 170;
 
-type Gender = 'Male' | 'Female' | '';
-type Goal = 'Lose Weight' | 'Build Muscles' | 'Home Workout' | 'Healthy Diet';
 
+type Gender = 'Male' | 'Female';
+type Goal = 'Lose Weight' | 'Gain Weight' | 'Build Muscles' | 'Stay Fit';
+const DEFAULT_WEIGHT = 70;
 const goals: { label: Goal; image: any }[] = [
-  { label: 'Lose Weight', image: require('../../assets/workout1.jpg') },
-  { label: 'Build Muscles', image: require('../../assets/workout1.jpg') },
-  { label: 'Home Workout', image: require('../../assets/workout1.jpg') },
-  { label: 'Healthy Diet', image: require('../../assets/workout1.jpg') },
+  { label: 'Lose Weight', image: require('../../assets/waitloss.jpeg') },
+  { label: 'Gain Weight', image: require('../../assets/bulk.jpeg') },
+  { label: 'Build Muscles', image: require('../../assets/build.png') },
+  { label: 'Stay Fit', image: require('../../assets/leanfit.png') },
 ];
 
 const TOTAL_STEPS = 4;
@@ -43,66 +46,108 @@ export default function ProfileSetupScreen({ navigation }: any) {
   const [gender, setGender] = useState<Gender>('');
   const [birthdate, setBirthdate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-
+const weightScrollRef = React.useRef<ScrollView>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
-  const [heightVal, setHeightVal] = useState('');
-  const [weightVal, setWeightVal] = useState('');
+const [heightVal, setHeightVal] = useState(String(DEFAULT_HEIGHT));
+const heightScrollRef = React.useRef<ScrollView>(null);
 
+  const [weightVal, setWeightVal] = useState(String(DEFAULT_WEIGHT));
+
+  const weights = Array.from({ length: 201 }, (_, i) => i + 30); // 30kg–230kg
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const heights = Array.from({ length: 121 }, (_, i) => i + 120); // 120cm–240cm
 
   const titles = [
-    'Welcome',
+    'Set Your Profile First',
     'Select Your Goal',
-    'Personal Information',
     'Body Details',
+    'Personal Information',
   ];
 
-  /* ---------- VALIDATION ---------- */
   const canProceed = (() => {
     switch (step) {
-      case 1:
-        return true;
-      case 2:
-        return !!goal;
-      case 3:
+      case 1: return true;
+      case 2: return !!goal;
+      case 3: return heightVal && weightVal;
+      case 4:
         return (
           gender &&
           firstName.trim() &&
           lastName.trim() &&
           phone.trim() &&
           username.trim() &&
-          usernameAvailable === true
+          !checkingUsername
         );
-      case 4:
-        return heightVal.trim() && weightVal.trim();
-      default:
-        return false;
+      default: return false;
     }
   })();
 
-  /* ---------- USERNAME CHECK ---------- */
-  const checkUsername = async () => {
-    if (!username.trim()) return;
+  React.useEffect(() => {
+  const index = heights.indexOf(DEFAULT_HEIGHT);
+  if (index !== -1) {
+    requestAnimationFrame(() => {
+      heightScrollRef.current?.scrollTo({
+        y: index * ITEM_HEIGHT,
+        animated: false,
+      });
+    });
+  }
+}, []);
+
+React.useEffect(() => {
+  const index = weights.indexOf(DEFAULT_WEIGHT);
+  if (index !== -1) {
+    requestAnimationFrame(() => {
+      weightScrollRef.current?.scrollTo({
+        x: index * 70,
+        animated: false,
+      });
+    });
+  }
+}, []);
+
+  const checkUsernameAvailability = async () => {
+    if (!username.trim()) return false;
 
     setCheckingUsername(true);
-    setUsernameAvailable(null);
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id')
-      .eq('username', username.trim())
-      .maybeSingle();
+      .eq('username', username.toLowerCase())
+      .neq('id', userId)
+      .limit(1);
 
     setCheckingUsername(false);
-    setUsernameAvailable(!data);
+
+    if (error) {
+      console.log('Username check error:', error.message);
+      return false;
+    }
+
+    const available = data?.length === 0;
+    setUsernameAvailable(available);
+    return available;
   };
 
-  /* ---------- NAVIGATION ---------- */
   const handleNext = async () => {
+    if (step === 4) {
+      if (!username.trim()) return;
+      const available = await checkUsernameAvailability();
+      if (!available) {
+        setUsernameError('Username already exists');
+        setUsernameAvailable(false);
+        return;
+      }
+    }
+
     if (!canProceed) return;
 
     if (step < TOTAL_STEPS) {
@@ -111,80 +156,55 @@ export default function ProfileSetupScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    const { data } = await supabase.auth.getUser();
-    if (!data?.user) return;
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      const userEmail = authData?.user?.email;
+      if (!userId || !userEmail) throw new Error('User not found');
 
-    if (usernameAvailable !== true) {
-      Alert.alert('Username unavailable');
+      const { error } = await supabase.from('profiles').upsert({
+        id: userId,
+        email: userEmail,
+        first_name: firstName,
+        last_name: lastName,
+        username,
+        phone,
+        gender,
+        goal,
+        birthdate: birthdate.toISOString().split('T')[0],
+        height: Number(heightVal),
+        weight: Number(weightVal),
+      });
+
+      if (error) {
+        if (error.message.includes('profiles_username_key')) {
+          setUsernameError('Username already exists');
+          setUsernameAvailable(false);
+        } else {
+          setUsernameError(error.message);
+        }
+      } else {
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      }
+    } catch (err: any) {
+      setUsernameError(err.message || 'An error occurred');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { error } = await supabase.from('profiles').upsert({
-      id: data.user.id,
-      email: data.user.email,
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
-      username: username.trim(),
-      phone: phone.trim(),
-      gender,
-      goal,
-      birthdate: birthdate.toISOString().split('T')[0],
-      height: Number(heightVal),
-      weight: Number(weightVal),
-    });
-
-    setLoading(false);
-    if (error) Alert.alert('Error', error.message);
-    else navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
   };
 
-  /* ---------- HEADER ---------- */
-  const Header = () => (
-    <View style={styles.header}>
-      <View style={styles.headerRow}>
-        {step > 1 ? (
-          <TouchableOpacity onPress={() => setStep(step - 1)}>
-            <Text style={styles.back}>‹</Text>
-          </TouchableOpacity>
-        ) : <View style={{ width: 30 }} />}
-        <Text
-          style={[
-            styles.stepText,
-            { textAlign: step === 1 ? 'right' : 'left', flex: 1 },
-          ]}
-        >
-          STEP {step} OF {TOTAL_STEPS}
-        </Text>
-      </View>
-
-      <Text style={styles.title}>{titles[step - 1]}</Text>
-
-      <View style={styles.progress}>
-        <View
-          style={[
-            styles.progressFill,
-            { width: `${(step / TOTAL_STEPS) * 100}%` },
-          ]}
-        />
-      </View>
-    </View>
-  );
-
-  /* ---------- SCREENS ---------- */
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <ImageBackground
-            source={require('../../assets/intro1.png')}
+            source={require('../../assets/setprofileintro.jpeg')}
             style={styles.hero}
           >
             <Text style={styles.heroTitle}>Transform Your Body</Text>
-            <Text style={styles.heroSub}>Personalized fitness journey</Text>
+            <Text style={styles.heroSub}>Excuses don’t burn calories.</Text>
           </ImageBackground>
         );
-
       case 2:
         return (
           <View style={styles.grid}>
@@ -202,8 +222,111 @@ export default function ProfileSetupScreen({ navigation }: any) {
             ))}
           </View>
         );
-
       case 3:
+  return (
+    <>
+    {/* BIRTHDATE PICKER */}
+      <TouchableOpacity
+        style={styles.dateCard}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.dateLabel}>Birthdate</Text>
+        <Text style={styles.dateValue}>{birthdate.toDateString()}</Text>
+      </TouchableOpacity>
+
+      <DateTimePickerModal
+        isVisible={showDatePicker}
+        mode="date"
+        maximumDate={new Date()}
+        onConfirm={(date) => {
+          setBirthdate(date);
+          setShowDatePicker(false);
+        }}
+        onCancel={() => setShowDatePicker(false)}
+      />
+      {/* WEIGHT PICKER */}
+      <View style={styles.weightContainer}>
+        <Text style={styles.pickerLabel}>Weight (kg)</Text>
+
+        <View style={styles.weightScale}>
+          <View style={styles.weightIndicator} />
+
+          <ScrollView
+            ref={weightScrollRef}
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={70}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: width / 2 - 35 }}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.x / 70);
+              setWeightVal(String(weights[index]));
+            }}
+          >
+            {weights.map((w) => (
+              <View key={w} style={styles.weightItem}>
+                <Text
+                  style={[
+                    styles.weightText,
+                    weightVal === String(w) && styles.weightActive,
+                  ]}
+                >
+                  {w}
+                </Text>
+                <View style={styles.tick} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+      </View>
+
+      {/* HEIGHT PICKER */}
+      <View style={styles.pickerCard}>
+        <Text style={styles.pickerLabel}>Height (cm)</Text>
+
+        <View style={styles.heightWheel}>
+          <View style={styles.heightIndicator} />
+
+          <ScrollView
+            ref={heightScrollRef}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+            snapToInterval={ITEM_HEIGHT}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingVertical: 75 }}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.min(
+                heights.length - 1,
+                Math.max(
+                  0,
+                  Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT)
+                )
+              );
+              setHeightVal(String(heights[index]));
+            }}
+          >
+            {heights.map((h) => (
+              <View key={h} style={styles.heightItem}>
+                <Text
+                  style={[
+                    styles.heightText,
+                    heightVal === String(h) && styles.heightActive,
+                  ]}
+                >
+                  {h}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+
+    </>
+  );
+
+      case 4:
         return (
           <>
             <View style={styles.genderRow}>
@@ -217,121 +340,218 @@ export default function ProfileSetupScreen({ navigation }: any) {
                 </TouchableOpacity>
               ))}
             </View>
-
             <Input placeholder="First Name" value={firstName} onChangeText={setFirstName} />
             <Input placeholder="Last Name" value={lastName} onChangeText={setLastName} />
-
             <Input
               placeholder="Username"
               value={username}
-              onChangeText={(t: React.SetStateAction<string>) => {
-                setUsername(t);
+              autoCapitalize="none"
+              onChangeText={(t: string) => {
+                setUsername(t.toLowerCase());
+                setUsernameError(null);
                 setUsernameAvailable(null);
               }}
-              onBlur={checkUsername}
-              style={[
-                styles.input,
-                usernameAvailable === false && { borderColor: '#ff4d4d', borderWidth: 1 },
-              ]}
+              style={(usernameAvailable === false || usernameError) && styles.inputError}
             />
-
-            {checkingUsername && <Text style={styles.info}>Checking username…</Text>}
-            {usernameAvailable === false && <Text style={styles.error}>Username already taken</Text>}
-            {usernameAvailable === true && <Text style={styles.success}>Username available</Text>}
-
+            {usernameError && <Text style={styles.error}>{usernameError}</Text>}
             <Input placeholder="Phone" value={phone} onChangeText={setPhone} />
-          </>
-        );
-
-      case 4:
-        return (
-          <>
-            <TouchableOpacity style={styles.dateCard} onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.dateLabel}>Birthdate</Text>
-              <Text style={styles.dateValue}>{birthdate.toDateString()}</Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={birthdate}
-                mode="date"
-                maximumDate={new Date()}
-                onChange={(_, d) => {
-                  setShowDatePicker(false);
-                  if (d) setBirthdate(d);
-                }}
-              />
-            )}
-
-            <Input placeholder="Height (cm)" value={heightVal} onChangeText={setHeightVal} />
-            <Input placeholder="Weight (kg)" value={weightVal} onChangeText={setWeightVal} />
           </>
         );
     }
   };
 
   return (
-    <>
-      <StatusBar barStyle="light-content" backgroundColor={BG} />
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" />
       <View style={styles.container}>
-        <Header />
-        <ScrollView>{renderStep()}</ScrollView>
+        <Text style={styles.stepText}>STEP {step} OF {TOTAL_STEPS}</Text>
+        <Text style={styles.title}>{titles[step - 1]}</Text>
+       <ScrollView nestedScrollEnabled>
+  {renderStep()}
+</ScrollView>
 
-        <TouchableOpacity
-          style={[styles.button, !canProceed && styles.disabled]}
-          disabled={!canProceed || loading}
-          onPress={handleNext}
-        >
-          {loading ? <ActivityIndicator /> :
-            <Text style={styles.buttonText}>{step === TOTAL_STEPS ? 'Finish' : 'Next'}</Text>}
-        </TouchableOpacity>
+
+        <View style={styles.buttonRow}>
+          {step > 1 && (
+            <TouchableOpacity
+              style={[styles.button, styles.sideButton, styles.backButton]}
+              disabled={loading}
+              onPress={() => setStep(step - 1)}
+            >
+              <Text style={[styles.buttonText, { color: '#fff' }]}>Back</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={[styles.button, styles.sideButton, !canProceed && styles.disabled]}
+            disabled={!canProceed || loading}
+            onPress={handleNext}
+          >
+            {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.buttonText}>{step === 4 ? 'Finish' : 'Next'}</Text>}
+          </TouchableOpacity>
+        </View>
       </View>
-    </>
+    </SafeAreaView>
   );
 }
 
-/* ---------- INPUT ---------- */
 const Input = (props: any) => (
-  <TextInput {...props} style={styles.input} placeholderTextColor="#888" />
+  <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor="#888" />
 );
 
-/* ---------- STYLES ---------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG, padding: 20 },
-  header: { marginBottom: 20 },
-  headerRow: { flexDirection: 'row', alignItems: 'center' },
-  back: { color: '#fff', fontSize: 34 },
+  safe: { flex: 1, backgroundColor: BG },
+  container: { flex: 1, padding: 20, paddingTop: 70 },
   stepText: { color: '#777', fontSize: 12 },
-  title: { color: '#fff', fontSize: 30, fontWeight: '900', marginTop: 6 },
-  progress: { height: 6, backgroundColor: '#222', borderRadius: 6, marginTop: 12 },
-  progressFill: { height: 6, backgroundColor: PRIMARY },
+  title: { color: '#fff', fontSize: 30, fontWeight: '900', marginBottom: 20 },
 
-  hero: { height: height * 0.7, justifyContent: 'flex-start', paddingTop: 80 },
-  heroTitle: { color: '#fff', fontSize: 36, fontWeight: '900' },
-  heroSub: { color: '#ccc', fontSize: 18, marginTop: 10 },
+  hero: { height: height * 0.7, paddingTop: 250 },
+  heroTitle: { color: PRIMARY, fontSize: 36, fontWeight: '900', textAlign: 'center' },
+  heroSub: { color: '#fff', fontSize: 20, fontWeight: '700', marginTop: 10, textAlign: 'center' },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   goalBox: { width: BOX_SIZE, height: BOX_SIZE, borderRadius: 18, overflow: 'hidden', marginBottom: GAP },
-  goalImg: { width: '100%', height: '100%' },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  goalImg: { width: '100%', height: '100%'},
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius:18 },
+  selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius:18 },
   goalText: { position: 'absolute', bottom: 12, color: '#fff', fontWeight: '800', alignSelf: 'center' },
-  selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY },
 
   genderRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   genderCard: { flex: 1, backgroundColor: '#111', padding: 20, borderRadius: 16, alignItems: 'center' },
-  genderText: { color: '#fff', fontSize: 18, fontWeight: '700' },
   selected: { borderWidth: 2, borderColor: PRIMARY },
+  genderText: { color: '#fff', fontSize: 18 },
 
   input: { backgroundColor: '#111', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
-  info: { color: '#aaa' },
-  error: { color: '#ff4d4d' },
-  success: { color: PRIMARY },
+  inputError: { borderColor: '#ff4d4d', borderWidth: 1 },
+  error: { color: '#ff4d4d', marginBottom: 10 },
 
-  dateCard: { backgroundColor: '#111', borderRadius: 16, padding: 18, marginBottom: 14 },
+  dateCard: { backgroundColor: '#111', padding: 18, borderRadius: 16, marginBottom: 14 },
   dateLabel: { color: '#888' },
   dateValue: { color: '#fff', fontWeight: '700' },
 
-  button: { backgroundColor: PRIMARY, paddingVertical: 18, borderRadius: 18, alignItems: 'center' },
+  button: { backgroundColor: PRIMARY, padding: 18, borderRadius: 18, alignItems: 'center', marginBottom: 20 },
   disabled: { opacity: 0.4 },
-  buttonText: { color: '#000', fontSize: 18, fontWeight: '900' },
+  buttonText: { fontSize: 18, fontWeight: '900', color: '#000' },
+  backButton: { backgroundColor: '#333' },
+
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 20 },
+  sideButton: { flex: 1 },
+  weightContainer: {
+  marginTop: 20,
+  alignItems: 'center',
+},
+
+
+weightText: {
+  fontSize: 22,
+  color: '#666',
+  fontWeight: '600',
+},
+
+weightActive: {
+  color: PRIMARY,
+  fontSize: 25,
+  fontWeight: '900',
+},
+
+weightValue: {
+  marginTop: 5,
+  fontSize: 25,
+  color: '#fff',
+  fontWeight: '800',
+},
+pickerCard: {
+  backgroundColor: '#111',
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 0,
+},
+
+pickerLabel: {
+  color: '#888',
+  marginBottom: 10,
+  fontWeight: '700',
+},
+
+picker: {
+  color: '#fff',
+},
+
+pickerItem: {
+  color: '#fff',
+  fontSize: 20,
+},
+heightContainer: {
+  marginTop: 20,
+  alignItems: 'center',
+},
+
+heightWheel: {
+  height: 200,
+  width: '100%',
+  backgroundColor: '#0f0f0f',
+  borderRadius: 20,
+  overflow: 'hidden',
+},
+
+heightItem: {
+  height: 50,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+heightText: {
+  fontSize: 20,
+  color: '#666',
+  fontWeight: '600',
+},
+
+heightActive: {
+  color: PRIMARY,
+  fontSize: 28,
+  fontWeight: '900',
+},
+
+heightIndicator: {
+  position: 'absolute',
+  top: 75,
+  left: 0,
+  right: 0,
+  height: 50,
+  borderTopWidth: 1,
+  borderBottomWidth: 1,
+  borderColor: PRIMARY,
+  zIndex: 10,
+},
+
+weightScale: {
+  height: 100,
+  backgroundColor: '#0f0f0f',
+  borderRadius: 20,
+  justifyContent: 'center',
+},
+
+weightItem: {
+  width: 70,
+  alignItems: 'center',
+},
+
+tick: {
+  width: 2,
+  height: 20,
+  backgroundColor: '#444',
+  marginTop: 6,
+},
+
+weightIndicator: {
+  position: 'absolute',
+  left: width / 2 - 1.5, // ⭐ exact center of screen
+  top: 10,
+  bottom: 10,
+  width: 3,
+  backgroundColor: PRIMARY,
+  zIndex: 10,
+},
+
+
 });
