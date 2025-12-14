@@ -43,7 +43,8 @@ export default function ProfileSetupScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const [goal, setGoal] = useState<Goal | ''>('');
-  const [gender, setGender] = useState<Gender>('');
+  const [gender, setGender] = useState<Gender | ''>('');
+
   const [birthdate, setBirthdate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 const weightScrollRef = React.useRef<ScrollView>(null);
