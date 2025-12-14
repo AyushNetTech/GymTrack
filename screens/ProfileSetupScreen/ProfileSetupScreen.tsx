@@ -231,7 +231,7 @@ React.useEffect(() => {
         style={styles.dateCard}
         onPress={() => setShowDatePicker(true)}
       >
-        <Text style={styles.dateLabel}>Birthdate</Text>
+        <Text style={styles.dateLabel}>Select Birthdate</Text>
         <Text style={styles.dateValue}>{birthdate.toDateString()}</Text>
       </TouchableOpacity>
 
@@ -247,7 +247,7 @@ React.useEffect(() => {
       />
       {/* WEIGHT PICKER */}
       <View style={styles.weightContainer}>
-        <Text style={styles.pickerLabel}>Weight (kg)</Text>
+        <Text style={styles.weightLabel}>Weight (kg)</Text>
 
         <View style={styles.weightScale}>
           <View style={styles.weightIndicator} />
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   container: { flex: 1, padding: 20, paddingTop: 70 },
   stepText: { color: '#777', fontSize: 12 },
-  title: { color: '#fff', fontSize: 30, fontWeight: '900', marginBottom: 20 },
+  title: { color: '#fff', fontSize: 30, fontWeight: '900', marginBottom: 10 },
 
   hero: { height: height * 0.7, paddingTop: 250 },
   heroTitle: { color: PRIMARY, fontSize: 36, fontWeight: '900', textAlign: 'center' },
@@ -424,11 +424,11 @@ const styles = StyleSheet.create({
 
   input: { backgroundColor: '#111', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
   inputError: { borderColor: '#ff4d4d', borderWidth: 1 },
-  error: { color: '#ff4d4d', marginBottom: 10 },
+  error: { color: '#ff4d4d', marginBottom: 5 },
 
-  dateCard: { backgroundColor: '#111', padding: 18, borderRadius: 16, marginBottom: 14 },
-  dateLabel: { color: '#888' },
-  dateValue: { color: '#fff', fontWeight: '700' },
+  dateCard: { backgroundColor: '#111', padding: 16, borderRadius: 16, marginBottom:0 },
+  dateLabel: { color: '#fff', fontSize:18, fontWeight:700, marginBottom:10 },
+  dateValue: { color: PRIMARY, fontWeight: '700', fontSize:12 },
 
   button: { backgroundColor: PRIMARY, padding: 18, borderRadius: 18, alignItems: 'center', marginBottom: 20 },
   disabled: { opacity: 0.4 },
@@ -438,8 +438,7 @@ const styles = StyleSheet.create({
   buttonRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 20 },
   sideButton: { flex: 1 },
   weightContainer: {
-  marginTop: 20,
-  alignItems: 'center',
+  marginTop: 0,
 },
 
 
@@ -455,12 +454,7 @@ weightActive: {
   fontWeight: '900',
 },
 
-weightValue: {
-  marginTop: 5,
-  fontSize: 25,
-  color: '#fff',
-  fontWeight: '800',
-},
+
 pickerCard: {
   backgroundColor: '#111',
   borderRadius: 16,
@@ -469,9 +463,17 @@ pickerCard: {
 },
 
 pickerLabel: {
-  color: '#888',
-  marginBottom: 10,
+  color: '#fff',
+  marginBottom: 5,
   fontWeight: '700',
+  fontSize:18
+},
+
+weightLabel: {
+  color: '#fff',
+  fontWeight: '700',
+  fontSize:16,
+  padding:16
 },
 
 picker: {
@@ -483,7 +485,6 @@ pickerItem: {
   fontSize: 20,
 },
 heightContainer: {
-  marginTop: 20,
   alignItems: 'center',
 },
 
@@ -526,6 +527,7 @@ heightIndicator: {
 },
 
 weightScale: {
+  marginBottom:10,
   height: 100,
   backgroundColor: '#0f0f0f',
   borderRadius: 20,
@@ -547,12 +549,10 @@ tick: {
 weightIndicator: {
   position: 'absolute',
   left: width / 2 - 1.5, // ⭐ exact center of screen
-  top: 10,
+  top: 30,
   bottom: 10,
-  width: 3,
+  width: 4,
   backgroundColor: PRIMARY,
   zIndex: 10,
 },
-
-
 });
