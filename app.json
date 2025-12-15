@@ -21,26 +21,28 @@
       "supportsTablet": true
     },
     "android": {
-  "package": "com.ayushupasetech.myapp",
-  "adaptiveIcon": {
-    "foregroundImage": "./assets/adaptive-icon.png",
-    "backgroundColor": "#ffffff"
-  },
-  "intentFilters": [
-    {
-      "action": "VIEW",
-      "data": [
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ayushupasetech.myapp",
+      "intentFilters": [
         {
-          "scheme": "myapp"
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "myapp"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
-      ],
-      "category": [
-        "BROWSABLE",
-        "DEFAULT"
       ]
-    }
-  ]
-},
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
