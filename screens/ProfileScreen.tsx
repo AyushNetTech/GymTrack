@@ -306,7 +306,10 @@ avatar: {
   signOut: {
     marginTop: 10,
     marginHorizontal: 20,
-    backgroundColor: "#ff572dff",
+    backgroundColor: "#ff7351ff",
+    color:"#fff",
+    fontWeight:"bold",
+    fontSize:16
   },
 
   uploadOverlay: {
