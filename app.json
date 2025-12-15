@@ -21,36 +21,34 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.ayushupasetech.myapp",
-      "intentFilters": [
+  "package": "com.ayushupasetech.myapp",
+  "adaptiveIcon": {
+    "foregroundImage": "./assets/adaptive-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "intentFilters": [
+    {
+      "action": "VIEW",
+      "data": [
         {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "myapp"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "scheme": "myapp"
         }
+      ],
+      "category": [
+        "BROWSABLE",
+        "DEFAULT"
       ]
-    },
+    }
+  ]
+},
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "d302e0ed-04fa-4930-bae3-5daff1344f07"
+        "projectId": "76b2a723-b856-4ca7-ab49-41c725397b11"
       }
     },
-    "owner": "ayushupasetech"
+    "owner": "ayushupase333"
   }
 }
