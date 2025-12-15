@@ -20,6 +20,24 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useToast } from "../components/ToastProvider";
 import { navigationRef } from "../App";
 
+function calculateAge(birthdate?: string | null) {
+  if (!birthdate) return "--";
+
+  const today = new Date();
+  const birth = new Date(birthdate + "T00:00:00"); // force local time
+
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age > 0 ? age : "--";
+}
+
+
+
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -134,14 +152,32 @@ export default function ProfileScreen() {
             <Text style={styles.name}>
               {profile?.first_name} {profile?.last_name}
             </Text>
-            <Text style={styles.subtitle}>Lose Fat Program</Text>
+            <Text style={styles.subtitle}>
+              @{profile?.username ?? "user"}
+            </Text>
 
             {/* GLASS STATS */}
             <BlurView intensity={50} tint="dark" style={styles.statsCard}>
-              <Stat label="Height" value="180cm" />
-              <Stat label="Weight" value="70kg" />
-              <Stat label="Age" value="20Y" />
-              <Stat label="Challenge" value="6m" />
+              <Stat
+                label="Height"
+                value={profile?.height ? `${profile.height} cm` : "--"}
+              />
+
+              <Stat
+                label="Weight"
+                value={profile?.weight ? `${profile.weight} kg` : "--"}
+              />
+
+              <Stat
+                label="Age"
+                value={`${calculateAge(profile?.birthdate)} Y`}
+              />
+
+              <Stat
+                label="Goal"
+                value={profile?.goal ?? "--"}
+              />
+
             </BlurView>
 
           </View>
@@ -235,7 +271,7 @@ avatar: {
   },
 
   name: { fontSize: 22, color: "white", fontWeight: "700" },
-  subtitle: { color: "#aaa", marginTop: 4 },
+  subtitle: { color: "#f4ff47", marginTop: 4, fontWeight:"bold", fontSize:16 },
 
   statsCard: {
     flexDirection: "row",
