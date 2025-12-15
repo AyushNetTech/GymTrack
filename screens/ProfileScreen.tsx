@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ImageBackground,
+  useWindowDimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Text, Button, ActivityIndicator } from "react-native-paper";
@@ -23,6 +24,11 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const { height: screenHeight } = useWindowDimensions();
+  const HEADER_HEIGHT = Math.min(
+  Math.max(screenHeight * 0.42, 280), // min height
+  360                               // max height
+);
 
   const { showToast } = useToast();
   const defaultAvatar = require("../assets/blankprofile.png");
@@ -109,9 +115,10 @@ export default function ProfileScreen() {
         {/* HEADER WITH BACKGROUND */}
         <ImageBackground
           source={require("../assets/gym1.jpg")}
-          style={styles.header}
+          style={[styles.header, { height: HEADER_HEIGHT }]}
           imageStyle={{ opacity: 0.95 }}
         >
+
           <View style={styles.headerOverlay}>
 
             <View style={styles.photoContainer}>
@@ -187,32 +194,41 @@ const ProfileItem = ({ title, icon }: any) => (
 /* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
+
   container: { flex: 1 },
+header: {
+  borderBottomLeftRadius: 28,
+  borderBottomRightRadius: 28,
+  overflow: "hidden",
+},
 
-  header: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    overflow: "hidden",
-  },
 
-  headerOverlay: {
-    backgroundColor: "rgba(0,0,0,0.55)",
-    alignItems: "center",
-    paddingTop: 70,
-    paddingBottom: 32,
-  },
+
+headerOverlay: {
+  flex: 1, // 🔥 makes overlay fill header height
+  backgroundColor: "rgba(0,0,0,0.55)",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingTop: 20,
+  paddingBottom: 20,
+},
+
 
   photoContainer: { position: "relative", marginBottom: 10 },
-
-  avatar: { width: 120, height: 120, borderRadius: 60 },
+avatar: {
+  marginTop:60,
+  width: 110,
+  height: 110,
+  borderRadius: 55,
+},
 
   editIcon: {
     position: "absolute",
-    bottom: 6,
-    right: 6,
+    bottom: 2,
+    right: 2,
     backgroundColor: "#f4ff47",
-    width: 34,
-    height: 34,
+    width: 32,
+    height: 32,
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
@@ -223,22 +239,22 @@ const styles = StyleSheet.create({
 
   statsCard: {
     flexDirection: "row",
-    marginTop: 20,
-    paddingVertical: 14,
+    marginTop: 14,
+    paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 18,
     width: "92%",
     justifyContent: "space-around",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.7)",
   },
 
-  statItem: { alignItems: "center" },
-  statValue: { color: "white", fontWeight: "700" },
-  statLabel: { color: "#bbb", fontSize: 14 },
+  statItem: { alignItems: "center", borderRadius:18 },
+  statValue: { color: "white", fontWeight: "700", borderRadius:18 },
+  statLabel: { color: "#bbb", fontSize: 14, borderRadius:18 },
 
-  section: { marginTop: 25, paddingHorizontal: 20 },
-  sectionTitle: { color: "#888", marginBottom: 10 },
+  section: { marginTop: 20, paddingHorizontal: 20 },
+  sectionTitle: { color: "#b4b4b4ff", marginBottom: 10 },
 
   itemRow: {
     flexDirection: "row",
@@ -252,14 +268,14 @@ const styles = StyleSheet.create({
   itemText: { color: "white", marginLeft: 14 },
 
   signOut: {
-    marginTop: 30,
+    marginTop: 10,
     marginHorizontal: 20,
-    backgroundColor: "#1f1f22",
+    backgroundColor: "#ff572dff",
   },
 
   uploadOverlay: {
     position: "absolute",
-    top: 110,
+    top: 100,
     alignSelf: "center",
     flexDirection: "row",
     backgroundColor: "rgba(0,0,0,0.7)",
