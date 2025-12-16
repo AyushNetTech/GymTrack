@@ -260,8 +260,8 @@ avatar: {
 
   editIcon: {
     position: "absolute",
-    bottom: 2,
-    right: 2,
+    bottom: 6,
+    right: 6,
     backgroundColor: "#f4ff47",
     width: 32,
     height: 32,
@@ -306,7 +306,7 @@ avatar: {
   signOut: {
     marginTop: 10,
     marginHorizontal: 20,
-    backgroundColor: "#ff7351ff",
+    backgroundColor: "#ff5328ff",
     color:"#fff",
     fontWeight:"bold",
     fontSize:16
