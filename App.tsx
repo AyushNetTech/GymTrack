@@ -12,6 +12,8 @@ import TabNavigator from "./navigation/TabNavigator";
 import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
+import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
+
 
 export type RootStackParamList = {
   Intro: undefined;
@@ -38,6 +40,8 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [handlingCallback, setHandlingCallback] = useState(false);
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+
 
   if (Platform.OS === "android") {
     StatusBar.setTranslucent(false);
@@ -141,18 +145,8 @@ export default function App() {
 
     // 2️⃣ EMAIL VERIFICATION
     if (url.includes("auth/callback")) {
-      Alert.alert(
-        "Verification Successful",
-        "Your email has been verified. Please sign in."
-      );
-
-      navigationRef.isReady() &&
-        navigationRef.reset({
-          index: 0,
-          routes: [{ name: "Auth" }],
-        });
-
-      return;
+      setShowVerifyDialog(true);
+      return; // 🚫 DO NOT NAVIGATE HERE
     }
   };
 
@@ -225,6 +219,18 @@ export default function App() {
         <ToastProvider>
           <StatusBar barStyle="light-content" backgroundColor="black" />
           <NavigationContainer linking={linking} ref={navigationRef}>
+            <VerificationSuccessDialog
+              visible={showVerifyDialog}
+              onClose={() => {
+                setShowVerifyDialog(false);
+
+                navigationRef.isReady() &&
+                  navigationRef.reset({
+                    index: 0,
+                    routes: [{ name: "Auth" }],
+                  });
+              }}
+            />
             <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={session ? "Home" : "Intro"}>
               {!session && <Stack.Screen name="Intro" component={IntroScreen} />}
               {!session && <Stack.Screen name="Auth" component={AuthScreen} />}
