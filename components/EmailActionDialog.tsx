@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { Portal, Dialog } from 'react-native-paper';
+import LottieView from 'lottie-react-native';
 
 type Props = {
   visible: boolean;
@@ -16,9 +17,14 @@ export default function EmailActionDialog({
   message,
 }: Props) {
   const progress = useRef(new Animated.Value(1)).current;
+  const lottieRef = useRef<LottieView>(null);
 
   useEffect(() => {
     if (!visible) return;
+
+    // Reset & play animation
+    lottieRef.current?.reset();
+    lottieRef.current?.play();
 
     progress.setValue(1);
     Animated.timing(progress, {
@@ -26,8 +32,8 @@ export default function EmailActionDialog({
       duration: duration * 1000,
       easing: Easing.linear,
       useNativeDriver: false,
-    }).start(() => setTimeout(() => onTimeout(), 0));
-  }, [visible, duration, onTimeout, progress]);
+    }).start(() => onTimeout());
+  }, [visible, duration, onTimeout]);
 
   const width = progress.interpolate({
     inputRange: [0, 1],
@@ -44,11 +50,24 @@ export default function EmailActionDialog({
   return (
     <Portal>
       <Dialog visible={visible} dismissable={false} style={styles.dialog}>
-        <Dialog.Title style={styles.title}>Email Action</Dialog.Title>
+        <Dialog.Title style={styles.title}>
+          Email Action
+        </Dialog.Title>
+
         <Dialog.Content style={styles.content}>
+          {/* 🔥 Lottie Animation */}
+          <LottieView
+            ref={lottieRef}
+            source={require('../assets/MailSendWhite.json')}
+            autoPlay
+            loop={false}
+            style={styles.lottie}
+          />
+
           <Text style={styles.message}>
             {message || 'Check your email and click the verification link!'}
           </Text>
+
           <View style={styles.progressContainer}>
             <Animated.View
               style={[styles.progressBar, { width, backgroundColor }]}
@@ -64,29 +83,33 @@ const styles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: "#eee"
+    backgroundColor: '#eee',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    color:"black"
+    color: 'black',
   },
   content: {
     alignItems: 'center',
     paddingVertical: 16,
-    color:"black"
+  },
+  lottie: {
+    width: 200,
+    height: 200,
+    marginBottom: 12,
   },
   message: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#000000ff',
+    color: '#000',
   },
   progressContainer: {
     width: '100%',
     height: 12,
-    backgroundColor: '#eee',
+    backgroundColor: '#ddd',
     borderRadius: 6,
     overflow: 'hidden',
   },
