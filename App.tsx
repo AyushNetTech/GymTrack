@@ -125,29 +125,48 @@ export default function App() {
   // Deep link listener
   // -----------------------
   useEffect(() => {
-  const handleDeepLink = ({ url }: { url: string }) => {
-    
+  const handleUrl = ({ url }: { url: string }) => {
 
+    // 1️⃣ RESET PASSWORD (highest priority)
     if (url.includes("reset-password")) {
+
       navigationRef.isReady() &&
-        navigationRef.navigate("ResetPassword", { url });
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: "ResetPassword", params: { url } }],
+        });
+
       return;
     }
 
+    // 2️⃣ EMAIL VERIFICATION
     if (url.includes("auth/callback")) {
-      handleAuthCallback(url);
+      Alert.alert(
+        "Verification Successful",
+        "Your email has been verified. Please sign in."
+      );
+
+      navigationRef.isReady() &&
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: "Auth" }],
+        });
+
       return;
     }
   };
 
-  const sub = Linking.addEventListener("url", handleDeepLink);
-
+  // Cold start
   Linking.getInitialURL().then((url) => {
-    if (url) handleDeepLink({ url });
+    if (url) handleUrl({ url });
   });
+
+  // Warm start
+  const sub = Linking.addEventListener("url", handleUrl);
 
   return () => sub.remove();
 }, []);
+
 
 
   // -----------------------

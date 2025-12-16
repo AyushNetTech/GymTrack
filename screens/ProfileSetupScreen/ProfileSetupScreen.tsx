@@ -17,6 +17,7 @@ import { supabase } from '../../lib/supabase';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 
+
 const PRIMARY = '#f4ff47';
 const BG = '#000';
 const { width, height } = Dimensions.get('window');
@@ -37,14 +38,14 @@ const goals: { label: Goal; image: any }[] = [
 ];
 
 const TOTAL_STEPS = 4;
-
+const GENDER_CARD_WIDTH = (width - 40 - 14) / 2;
 export default function ProfileSetupScreen({ navigation }: any) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const [goal, setGoal] = useState<Goal | ''>('');
   const [gender, setGender] = useState<Gender | ''>('');
-
+  
   const [birthdate, setBirthdate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 const weightScrollRef = React.useRef<ScrollView>(null);
@@ -331,16 +332,51 @@ React.useEffect(() => {
         return (
           <>
             <View style={styles.genderRow}>
-              {(['Male', 'Female'] as Gender[]).map(g => (
+              <View
+                style={[
+                  styles.genderBorderWrapper,
+                  gender === 'Male' && styles.genderSelected,
+                ]}
+              >
                 <TouchableOpacity
-                  key={g}
-                  style={[styles.genderCard, gender === g && styles.selected]}
-                  onPress={() => setGender(g)}
+                  style={styles.genderImageCard}
+                  onPress={() => setGender('Male')}
+                  activeOpacity={0.9}
                 >
-                  <Text style={styles.genderText}>{g}</Text>
+                  <ImageBackground
+                    source={require('../../assets/Male.jpg')}
+                    style={styles.genderBg}
+                  >
+                    <View style={styles.genderOverlay} />
+                    <Text style={styles.genderLabel}>MALE</Text>
+                  </ImageBackground>
                 </TouchableOpacity>
-              ))}
+              </View>
+
+              <View
+                style={[
+                  styles.genderBorderWrapper,
+                  gender === 'Female' && styles.genderSelected,
+                ]}
+              >
+                <TouchableOpacity
+                  style={styles.genderImageCard}
+                  onPress={() => setGender('Female')}
+                  activeOpacity={0.9}
+                >
+                  <ImageBackground
+                    source={require('../../assets/Female.jpg')}
+                    style={styles.genderBg}
+                  >
+                    <View style={styles.genderOverlay} />
+                    <Text style={styles.genderLabel}>FEMALE</Text>
+                  </ImageBackground>
+                </TouchableOpacity>
+              </View>
+
             </View>
+
+
             <Input placeholder="First Name" value={firstName} onChangeText={setFirstName} />
             <Input placeholder="Last Name" value={lastName} onChangeText={setLastName} />
             <Input
@@ -417,7 +453,6 @@ const styles = StyleSheet.create({
   selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius:18 },
   goalText: { position: 'absolute', bottom: 12, color: '#fff', fontWeight: '800', alignSelf: 'center' },
 
-  genderRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   genderCard: { flex: 1, backgroundColor: '#111', padding: 20, borderRadius: 16, alignItems: 'center' },
   selected: { borderWidth: 2, borderColor: PRIMARY },
   genderText: { color: '#fff', fontSize: 18 },
@@ -555,4 +590,50 @@ weightIndicator: {
   backgroundColor: PRIMARY,
   zIndex: 10,
 },
+
+genderRow: {
+  flexDirection: 'row',
+  gap: 14,
+  marginBottom: 20,
+},
+
+genderImageCard: {
+  width: '100%',
+  height: 150,
+  borderRadius: 22,
+  backgroundColor: '#111',
+  overflow: 'hidden',
+},
+
+genderBorderWrapper: {
+  width: GENDER_CARD_WIDTH,
+  borderRadius: 22,
+},
+
+
+genderBg: {
+  flex: 1,
+  justifyContent: 'flex-end',
+},
+
+genderOverlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+},
+
+genderLabel: {
+  alignSelf: 'center',
+  marginBottom: 14,
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '900',
+  letterSpacing: 1,
+},
+
+genderSelected: {
+  borderWidth: 3,
+  borderColor: PRIMARY,
+  borderRadius:22
+},
+
 });
