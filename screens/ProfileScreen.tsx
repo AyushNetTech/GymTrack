@@ -193,16 +193,15 @@ export default function ProfileScreen() {
           <ProfileItem title="Workout Progress" icon="chart-line" />
         </View>
 
-        <Button
-          mode="contained"
+        <TouchableOpacity
           style={styles.signOut}
           onPress={async () => {
             await supabase.auth.signOut();
-            navigationRef.reset({ index: 0, routes: [{ name: "Intro" }] });
+            navigationRef.reset({ index: 0, routes: [{ name: "Auth" }] });
           }}
         >
-          Sign Out
-        </Button>
+          <Text style={{color:"white", fontSize:14, fontWeight:"bold"}}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -309,7 +308,10 @@ avatar: {
     backgroundColor: "#ff5328ff",
     color:"#fff",
     fontWeight:"bold",
-    fontSize:16
+    fontSize:16,
+    padding:10,
+    alignItems:"center",
+    borderRadius:25
   },
 
   uploadOverlay: {
