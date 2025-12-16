@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Portal, Dialog } from 'react-native-paper';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 type Props = {
   visible: boolean;
@@ -22,7 +23,7 @@ export default function EmailExistsDialog({ visible, onClose, onSignIn, email }:
           </Text>
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.btn, styles.cancel]} onPress={onClose}>
-              <Text style={styles.btnText}>Cancel</Text>
+              <Text style={styles.CbtnText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.btn, styles.signIn]} onPress={onSignIn}>
               <Text style={styles.btnText}>Sign In</Text>
@@ -38,24 +39,24 @@ const styles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: "#eee"
+    backgroundColor: "#000000ff"
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    color:"black"
+    color:"white"
   },
   content: {
     alignItems: 'center',
     paddingVertical: 16,
-    color:"black"
+    color:"white"
   },
   message: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#000000ff',
+    color: "white",
   },
   buttonRow: {
     flexDirection: 'row',
@@ -75,13 +76,17 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cancel: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#363636ff',
   },
   signIn: {
-    backgroundColor: '#2e86de',
+    backgroundColor: '#f4ff47',
   },
   btnText: {
-    color: '#fff',
+    color: "black",
+    fontWeight: '700',
+  },
+  CbtnText:{
+    color: "white",
     fontWeight: '700',
   },
 });

@@ -42,7 +42,7 @@ export default function EmailActionDialog({
 
   const backgroundColor = progress.interpolate({
     inputRange: [0, 0.33, 0.66, 1],
-    outputRange: ['#ff6b6b', '#ffb84d', '#fff44d', '#4dff6b'],
+    outputRange: ['#ff0303ff', '#ff9900ff', '#f8e800ff', '#00ff2aff'],
   });
 
   if (!visible) return null;
@@ -58,7 +58,7 @@ export default function EmailActionDialog({
           {/* 🔥 Lottie Animation */}
           <LottieView
             ref={lottieRef}
-            source={require('../assets/MailSendWhite.json')}
+            source={require('../assets/EmailSendBlack.json')}
             autoPlay
             loop={false}
             style={styles.lottie}
@@ -83,33 +83,34 @@ const styles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#eee',
+    backgroundColor: '#111',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    color: 'black',
+    color: "white",
   },
   content: {
     alignItems: 'center',
     paddingVertical: 16,
+    color:"white"
   },
   lottie: {
-    width: 200,
-    height: 200,
+    width: 160,
+    height: 160,
     marginBottom: 12,
   },
   message: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#000',
+    color:"white",
   },
   progressContainer: {
     width: '100%',
     height: 12,
-    backgroundColor: '#ddd',
+    backgroundColor: '#000000ff',
     borderRadius: 6,
     overflow: 'hidden',
   },

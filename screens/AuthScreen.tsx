@@ -256,7 +256,7 @@ export default function AuthScreen({ navigation }: Props) {
 
         <TouchableOpacity style={styles.kiteButton} onPress={isSignUp ? signUp : signIn} disabled={loading}>
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
             <Ionicons name="arrow-forward" size={26} color="#000" style={styles.kiteButtonIcon} />
           )}
@@ -346,7 +346,8 @@ const styles = StyleSheet.create({
     shadowColor: "#3a3aff",
     shadowOpacity: 0.6,
     shadowRadius: 16,
+    color:"Black"
   },
-  kiteButtonIcon: { transform: [{ rotate: "-45deg" }] },
+  kiteButtonIcon: { transform: [{ rotate: "-45deg" }], color:"black" },
   inputError: { borderColor: "#ff4d4d", backgroundColor: "rgba(255,77,77,0.15)" },
 });

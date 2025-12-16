@@ -18,7 +18,7 @@ export default function VerificationSuccessDialog({ visible, onClose }: Props) {
               source={require("../assets/Success.json")}
               autoPlay
               loop={false}
-              style={{ width: 120, height: 120 }}
+              style={{ width: 200, height: 200 }}
             />
 
             <Text style={styles.title}>Email Verified!</Text>
