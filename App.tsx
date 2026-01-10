@@ -13,10 +13,14 @@ import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
 import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
- import { markAuthStarted } from "./utils/authState";
- import { hasAuthStarted } from "./utils/authState";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { hasCompletedProfile } from "./utils/profileState";
+import {
+  markAuthStarted,
+  hasAuthStarted,
+  shouldShowVerifyDialog,
+  clearAuthStarted,
+} from "./utils/authState";
 
 
 
@@ -57,16 +61,23 @@ const [profileCompleted, setProfileCompleted] = useState(false);
 useEffect(() => {
   const restoreAuthState = async () => {
     const started = await hasAuthStarted();
+    const showDialog = await shouldShowVerifyDialog();
 
     if (started) {
       setOpenedFromVerification(true);
     }
 
-    setAuthStateReady(true); // ✅ mark done
+    if (showDialog && !showVerifyDialog) {
+      setShowVerifyDialog(true);
+    }
+
+    setAuthStateReady(true);
   };
 
   restoreAuthState();
 }, []);
+
+
 
 
   if (Platform.OS === "android") {
@@ -163,17 +174,18 @@ useEffect(() => {
     // 2️⃣ EMAIL VERIFICATION
 
 
-if (url.includes("auth/callback")) {
-  // Alert.alert("Verification Link Opened");
+      if (url.includes("auth/callback")) {
+        // Alert.alert("Verification Link Opened");
 
-  await markAuthStarted();
-  setOpenedFromVerification(true);
+        await markAuthStarted();
+          setOpenedFromVerification(true);
 
-  await handleAuthCallback(url); // 🔑 THIS WAS MISSING
+          await handleAuthCallback(url);
 
-  setShowVerifyDialog(true);
-  return;
-}
+          // 🔥 ADD THIS
+          setShowVerifyDialog(true);
+        return;
+      }
 
 
 
@@ -219,7 +231,7 @@ if (url.includes("auth/callback")) {
     <SafeAreaProvider>
       <PaperProvider>
         <ToastProvider>
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" }}>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#111" }}>
             <ActivityIndicator size="large" color="#f4ff47" />
           </View>
         </ToastProvider>
@@ -244,8 +256,7 @@ if (url.includes("auth/callback")) {
               visible={showVerifyDialog}
               onClose={async () => {
                 setShowVerifyDialog(false);
-
-                await AsyncStorage.removeItem("AUTH_STARTED"); // cleanup
+                await clearAuthStarted();
 
                 navigationRef.reset({
                   index: 0,
