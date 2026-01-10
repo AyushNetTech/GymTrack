@@ -146,7 +146,7 @@ export default function IntroScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: "#111" },
 
   slide: { width, height },
 

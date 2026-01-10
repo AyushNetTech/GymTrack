@@ -9,7 +9,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Text, Button, ActivityIndicator } from "react-native-paper";
+import { Text, ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -19,6 +19,9 @@ import LoadingScreen from "../components/LoadingScreen";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useToast } from "../components/ToastProvider";
 import { navigationRef } from "../App";
+import { clearProfileCompleted } from "../utils/profileState";
+import { clearAuthStarted } from "../utils/authState";
+
 
 function calculateAge(birthdate?: string | null) {
   if (!birthdate) return "--";
@@ -45,7 +48,7 @@ export default function ProfileScreen() {
   const { height: screenHeight } = useWindowDimensions();
   const HEADER_HEIGHT = Math.min(
   Math.max(screenHeight * 0.42, 280), // min height
-  360                               // max height
+  300                             // max height
 );
 
   const { showToast } = useToast();
@@ -196,12 +199,28 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={styles.signOut}
           onPress={async () => {
+            // 1️⃣ Supabase sign out
             await supabase.auth.signOut();
-            navigationRef.reset({ index: 0, routes: [{ name: "Auth" }] });
+
+            // 2️⃣ Clear ALL auth-bound local storage
+            await clearProfileCompleted();
+            await clearAuthStarted();
+
+            // (optional safety net – not required but OK)
+            // await AsyncStorage.clear();
+
+            // 3️⃣ Reset navigation
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: "Auth" }],
+            });
           }}
         >
-          <Text style={{color:"white", fontSize:14, fontWeight:"bold"}}>Sign Out</Text>
+          <Text style={{ color: "white", fontSize: 14, fontWeight: "bold" }}>
+            Sign Out
+          </Text>
         </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );
@@ -244,14 +263,14 @@ headerOverlay: {
   backgroundColor: "rgba(0,0,0,0.55)",
   alignItems: "center",
   justifyContent: "center",
-  paddingTop: 20,
+  paddingTop: 10,
   paddingBottom: 20,
 },
 
 
-  photoContainer: { position: "relative", marginBottom: 10 },
+  photoContainer: { position: "relative", marginBottom: 5 },
 avatar: {
-  marginTop:60,
+  marginTop:50,
   width: 110,
   height: 110,
   borderRadius: 55,
@@ -269,19 +288,20 @@ avatar: {
     justifyContent: "center",
   },
 
-  name: { fontSize: 22, color: "white", fontWeight: "700" },
-  subtitle: { color: "#f4ff47", marginTop: 4, fontWeight:"bold", fontSize:16 },
+  name: { fontSize: 22, color: "white", fontWeight: "700"},
+  subtitle: { color: "#f4ff47", marginTop: 3, fontWeight:"bold", fontSize:16 },
 
   statsCard: {
     flexDirection: "row",
-    marginTop: 14,
-    paddingVertical: 12,
+    marginTop: 10,
+    paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 18,
     width: "92%",
     justifyContent: "space-around",
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.7)",
+    borderColor:"rgba(110, 110, 110, 0.9)",
+    backgroundColor: "rgba(51, 51, 51, 0.9)",
   },
 
   statItem: { alignItems: "center", borderRadius:18 },

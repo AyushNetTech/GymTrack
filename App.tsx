@@ -13,8 +13,7 @@ import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
 import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { hasCompletedProfile } from "./utils/profileState";
+import { checkProfileCompletion } from "./utils/profileState";
 import {
   markAuthStarted,
   hasAuthStarted,
@@ -100,6 +99,14 @@ useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       
       setSession(session);
+      if (!session) {
+        // 🔥 user signed out
+        setProfileCompleted(false);
+        setProfileChecked(false);
+        setOpenedFromVerification(false);
+        setShowVerifyDialog(false);
+        setHandlingCallback(false);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -216,7 +223,7 @@ useEffect(() => {
     const checkProfile = async () => {
       if (!session?.user || handlingCallback) return;
 
-      const completed = await hasCompletedProfile();
+      const completed = await checkProfileCompletion(session.user.id);
 
       setProfileCompleted(completed);
       setProfileChecked(true);
@@ -224,6 +231,7 @@ useEffect(() => {
 
     checkProfile();
   }, [session, handlingCallback]);
+
 
 
   if (!linkingReady || !authStateReady || (session && !profileChecked)) {
