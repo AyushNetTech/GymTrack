@@ -14,6 +14,42 @@ const { width } = Dimensions.get("window");
 
 const categories = ["Full Body", "Cardio", "Chest", "Stretching", "Strength"];
 
+const getFormattedDate = () => {
+  const today = new Date();
+
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const dayName = days[today.getDay()];
+  const date = today.getDate();
+  const month = months[today.getMonth()];
+
+  return `${dayName}, ${date} ${month}`;
+};
+
+
 const workouts = [
   { id: "1", title: "10-Min HIIT Cardio", duration: "22 min", img: "https://picsum.photos/400/600?1" },
   { id: "2", title: "Cycling Sprint Routine", duration: "20 min", img: "https://picsum.photos/400/600?2" },
@@ -53,8 +89,9 @@ export default function WorkoutScreen() {
         />
         <View style={{ position: "absolute", bottom: 10, right: 20 }}>
           <Text style={{ color: "#fff", fontSize: 14, opacity: 0.8 }}>
-            Friday, 19 July
+            {getFormattedDate()}
           </Text>
+
           <Text style={{ color: "#fff", fontSize: 32, fontWeight: "700" }}>
             Workouts
           </Text>

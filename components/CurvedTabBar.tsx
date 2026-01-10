@@ -78,7 +78,7 @@ const CurvedTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
       pointerEvents="box-none"
     >
       {/* Blur Background */}
-      <BlurView intensity={20} tint="light" style={styles.inner} />
+      <BlurView intensity={10} tint="light" style={styles.inner} />
 
       {/* Floating center button */}
       <TouchableOpacity
@@ -126,8 +126,8 @@ export default CurvedTabBar;
 const styles = StyleSheet.create({
   outer: {
     position: "absolute",
-    left: 35,
-    right: 35,
+    left: 30,
+    right: 30,
     bottom: 35,
     height: TAB_HEIGHT,
     justifyContent: "center",
