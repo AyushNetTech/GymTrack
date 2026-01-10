@@ -484,7 +484,9 @@ weekRow: {
   justifyContent: "space-around",   // better spacing than space-between
   marginTop: 20,
   height: 60,
-  alignItems:"center"
+  alignItems:"center",
+  backgroundColor:"#272727",
+  borderRadius:16,
 },
 
 weekItem: {
