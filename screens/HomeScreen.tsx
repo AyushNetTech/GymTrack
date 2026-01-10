@@ -240,13 +240,13 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: "#111" },
 
   fixedHeader: {
   paddingHorizontal: 20,
   paddingTop: 50,     // FIXED — no more extra gap
   paddingBottom: 10,
-  backgroundColor: "#000",
+  backgroundColor: "#111",
 },
 
 

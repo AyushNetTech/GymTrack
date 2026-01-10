@@ -34,12 +34,12 @@ export default function WorkoutScreen() {
   if (loading) return <LoadingScreen visible={true} />; // full-screen loader
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#111" }} edges={[]}>
       {/* ---------- HEADER IMAGE ---------- */}
       <View
         style={{
           width: "100%",
-          height: 260,
+          height: 200,
           position: "absolute",
           top: 0,
           zIndex: 10,
@@ -51,7 +51,7 @@ export default function WorkoutScreen() {
           }}
           style={{ width: "100%", height: "100%", opacity: 0.7 }}
         />
-        <View style={{ position: "absolute", bottom: 20, right: 20 }}>
+        <View style={{ position: "absolute", bottom: 10, right: 20 }}>
           <Text style={{ color: "#fff", fontSize: 14, opacity: 0.8 }}>
             Friday, 19 July
           </Text>
@@ -65,9 +65,9 @@ export default function WorkoutScreen() {
       <View
         style={{
           width: "100%",
-          backgroundColor: "#000",
+          backgroundColor: "#111",
           position: "absolute",
-          top: 260,
+          top: 200,
           zIndex: 10,
           paddingVertical: 12,
         }}
@@ -112,7 +112,7 @@ export default function WorkoutScreen() {
         data={workouts}
         keyExtractor={(item) => item.id}
         numColumns={2}
-        style={{ flex: 1, marginTop: 260 + 60 }} // push list below header & categories
+        style={{ flex: 1, marginTop: 200 + 60 }} // push list below header & categories
         contentContainerStyle={{
           paddingHorizontal: 15,
           paddingBottom: 200,

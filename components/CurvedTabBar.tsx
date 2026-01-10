@@ -136,10 +136,8 @@ const styles = StyleSheet.create({
   inner: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 40,
-    backgroundColor: "rgba(10, 10, 10, 0.95)",
+    backgroundColor: "rgba(61, 61, 61, 0.95)",
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#070707ff",
   },
   row: {
     flexDirection: "row",

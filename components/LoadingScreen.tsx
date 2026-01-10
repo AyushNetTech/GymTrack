@@ -26,7 +26,7 @@ export default function LoadingScreen({ visible = true }: LoadingScreenProps) {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject, // fills the whole screen
-    backgroundColor: "#000",
+    backgroundColor: "#111",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,

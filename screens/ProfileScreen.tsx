@@ -230,7 +230,7 @@ const ProfileItem = ({ title, icon }: any) => (
 
 const styles = StyleSheet.create({
 
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor:"#111"},
 header: {
   borderBottomLeftRadius: 28,
   borderBottomRightRadius: 28,
