@@ -14,6 +14,7 @@ import { supabase } from '../lib/supabase'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 
+
 export default function ResetPasswordScreen() {
   const navigation = useNavigation<any>()
   const route = useRoute<any>()
@@ -26,6 +27,9 @@ export default function ResetPasswordScreen() {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [refreshToken, setRefreshToken] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
+
+  const [checkedInitialUrl, setCheckedInitialUrl] = useState(false)
+
 
   const parseTokensFromUrl = (url: string | null) => {
     if (!url) return { accessToken: null, refreshToken: null }
@@ -54,6 +58,8 @@ export default function ResetPasswordScreen() {
         setRefreshToken(refreshToken)
         setReady(true)
       }
+
+      setCheckedInitialUrl(true) // ✅ ADD
     }
 
     const paramUrl = route.params?.url
@@ -66,6 +72,17 @@ export default function ResetPasswordScreen() {
     const sub = Linking.addEventListener('url', e => handleUrl(e.url))
     return () => sub.remove()
   }, [route.params])
+
+  useEffect(() => {
+  if (checkedInitialUrl && !ready) {
+    // 🚫 No reset token → escape safely
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Auth" }],
+    })
+  }
+}, [checkedInitialUrl, ready])
+
 
   const updatePassword = async () => {
     if (!password) return Alert.alert('Error', 'Enter a new password')
@@ -96,12 +113,14 @@ export default function ResetPasswordScreen() {
   }
 
   if (!ready) {
-    return (
-      <View style={styles.container}>
-        <Text style={{ color: "#fff", fontSize: 18 }}>Waiting for password reset link...</Text>
-      </View>
-    )
-  }
+  return (
+    <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <ActivityIndicator size="large" color="#f4ff47" />
+    </View>
+  )
+}
+
+
 
   return (
     <View style={styles.container}>

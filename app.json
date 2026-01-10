@@ -18,7 +18,11 @@
       "backgroundColor": "#fff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ayushupasetech.myapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,14 +35,22 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": [
-            {
-              "scheme": "myapp"
-            }
-          ],
           "category": [
             "BROWSABLE",
             "DEFAULT"
+          ],
+          "data": [
+            {
+              "scheme": "myapp"
+            },
+            {
+              "scheme": "myapp",
+              "host": "reset-password"
+            },
+            {
+              "scheme": "myapp",
+              "host": "profile-setup"
+            }
           ]
         }
       ]
@@ -48,9 +60,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "76b2a723-b856-4ca7-ab49-41c725397b11"
+        "projectId": "f81335df-f028-4520-b328-624e4addb265"
       }
     },
-    "owner": "ayushupase333"
+    "owner": "ayushupase369.1"
   }
 }

@@ -13,6 +13,11 @@ import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
 import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
+ import { markAuthStarted } from "./utils/authState";
+ import { hasAuthStarted } from "./utils/authState";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { hasCompletedProfile } from "./utils/profileState";
+
 
 
 export type RootStackParamList = {
@@ -41,6 +46,27 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [handlingCallback, setHandlingCallback] = useState(false);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+const [openedFromVerification, setOpenedFromVerification] = useState(false);
+const [linkingReady, setLinkingReady] = useState(false);
+const [navigationReady, setNavigationReady] = useState(false);
+const [authStateReady, setAuthStateReady] = useState(false);
+const [profileChecked, setProfileChecked] = useState(false);
+const [profileCompleted, setProfileCompleted] = useState(false);
+
+
+useEffect(() => {
+  const restoreAuthState = async () => {
+    const started = await hasAuthStarted();
+
+    if (started) {
+      setOpenedFromVerification(true);
+    }
+
+    setAuthStateReady(true); // ✅ mark done
+  };
+
+  restoreAuthState();
+}, []);
 
 
   if (Platform.OS === "android") {
@@ -112,15 +138,6 @@ export default function App() {
     return;
   }
 
-  
-
-  if (navigationRef.isReady()) {
-    navigationRef.reset({
-      index: 0,
-      routes: [{ name: "ProfileSetup" }],
-    });
-  }
-
   setHandlingCallback(false); // 🔓 unlock after navigation
 };
 
@@ -129,11 +146,11 @@ export default function App() {
   // Deep link listener
   // -----------------------
   useEffect(() => {
-  const handleUrl = ({ url }: { url: string }) => {
+  const handleUrl = async ({ url }: { url: string }) => {
 
     // 1️⃣ RESET PASSWORD (highest priority)
     if (url.includes("reset-password")) {
-
+      // Alert.alert("reset password")
       navigationRef.isReady() &&
         navigationRef.reset({
           index: 0,
@@ -144,22 +161,39 @@ export default function App() {
     }
 
     // 2️⃣ EMAIL VERIFICATION
-    if (url.includes("auth/callback")) {
-      setShowVerifyDialog(true);
-      return; // 🚫 DO NOT NAVIGATE HERE
-    }
+
+
+if (url.includes("auth/callback")) {
+  // Alert.alert("Verification Link Opened");
+
+  await markAuthStarted();
+  setOpenedFromVerification(true);
+
+  await handleAuthCallback(url); // 🔑 THIS WAS MISSING
+
+  setShowVerifyDialog(true);
+  return;
+}
+
+
+
   };
 
   // Cold start
   Linking.getInitialURL().then((url) => {
-    if (url) handleUrl({ url });
+    if (url) {
+      handleUrl({ url });
+    }
+    setLinkingReady(true); // ✅ mark linking resolved
   });
+
 
   // Warm start
   const sub = Linking.addEventListener("url", handleUrl);
 
   return () => sub.remove();
 }, []);
+
 
 
 
@@ -170,40 +204,22 @@ export default function App() {
     const checkProfile = async () => {
       if (!session?.user || handlingCallback) return;
 
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      const completed = await hasCompletedProfile();
 
-      if (!profile && navigationRef.isReady()) {
-        
-        navigationRef.reset({
-          index: 0,
-          routes: [{ name: 'ProfileSetup' }],
-        });
-      } else {
-        
-      }
+      setProfileCompleted(completed);
+      setProfileChecked(true);
     };
 
     checkProfile();
   }, [session, handlingCallback]);
 
-  if (loading || handlingCallback) {
+
+  if (!linkingReady || !authStateReady || (session && !profileChecked)) {
   return (
     <SafeAreaProvider>
       <PaperProvider>
         <ToastProvider>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#000",
-            }}
-          >
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" }}>
             <ActivityIndicator size="large" color="#f4ff47" />
           </View>
         </ToastProvider>
@@ -212,32 +228,67 @@ export default function App() {
   );
 }
 
-
   return (
     <SafeAreaProvider>
       <PaperProvider>
         <ToastProvider>
           <StatusBar barStyle="light-content" backgroundColor="black" />
-          <NavigationContainer linking={linking} ref={navigationRef}>
+          <NavigationContainer
+            linking={linking}
+            ref={navigationRef}
+            onReady={() => {
+              setNavigationReady(true);
+            }}
+          >
             <VerificationSuccessDialog
               visible={showVerifyDialog}
-              onClose={() => {
+              onClose={async () => {
                 setShowVerifyDialog(false);
 
-                navigationRef.isReady() &&
-                  navigationRef.reset({
-                    index: 0,
-                    routes: [{ name: "Auth" }],
-                  });
+                await AsyncStorage.removeItem("AUTH_STARTED"); // cleanup
+
+                navigationRef.reset({
+                  index: 0,
+                  routes: [{ name: "Auth" }],
+                });
               }}
+
             />
-            <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={session ? "Home" : "Intro"}>
-              {!session && <Stack.Screen name="Intro" component={IntroScreen} />}
-              {!session && <Stack.Screen name="Auth" component={AuthScreen} />}
-              <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ presentation: "modal" }} />
-              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-              <Stack.Screen name="Home" component={TabNavigator} options={{ gestureEnabled: false }} />
-            </Stack.Navigator>
+
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
+                {!session && !openedFromVerification && (
+                  <Stack.Screen name="Intro" component={IntroScreen} />
+                )}
+
+                {!session && <Stack.Screen name="Auth" component={AuthScreen} />}
+
+                {!session && (
+                  <Stack.Screen
+                    name="ResetPassword"
+                    component={ResetPasswordScreen}
+                    options={{ presentation: "modal" }}
+                  />
+                )}
+
+                {session && !profileCompleted && (
+                  <Stack.Screen name="ProfileSetup">
+                    {(props) => (
+                      <ProfileSetupScreen
+                        {...props}
+                        onProfileCompleted={() => {
+                          setProfileCompleted(true);
+                        }}
+                      />
+                    )}
+                  </Stack.Screen>
+                )}
+
+
+                {session && profileCompleted && (
+                  <Stack.Screen name="Home" component={TabNavigator} />
+                )}
+              </Stack.Navigator>
+
           </NavigationContainer>
         </ToastProvider>
       </PaperProvider>

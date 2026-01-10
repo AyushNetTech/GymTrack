@@ -16,6 +16,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
+import { markProfileCompleted } from "../../utils/profileState";
 
 
 const PRIMARY = '#f4ff47';
@@ -39,7 +40,11 @@ const goals: { label: Goal; image: any }[] = [
 
 const TOTAL_STEPS = 4;
 const GENDER_CARD_WIDTH = (width - 40 - 14) / 2;
-export default function ProfileSetupScreen({ navigation }: any) {
+export default function ProfileSetupScreen({
+  navigation,
+  onProfileCompleted,
+}: any) {
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -186,8 +191,11 @@ React.useEffect(() => {
           setUsernameError(error.message);
         }
       } else {
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
-      }
+          await markProfileCompleted();
+          onProfileCompleted(); // 🔥 THIS IS THE KEY
+        }
+
+
     } catch (err: any) {
       setUsernameError(err.message || 'An error occurred');
     } finally {
