@@ -12,6 +12,8 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { Keyboard } from "react-native";
+
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
@@ -284,7 +286,10 @@ export default function AuthScreen({ navigation }: Props) {
         )}
 
 
-        <TouchableOpacity style={styles.kiteButton} onPress={isSignUp ? signUp : signIn} disabled={loading}>
+        <TouchableOpacity style={styles.kiteButton} onPress={() => {
+            Keyboard.dismiss(); // ✅ CLOSE KEYBOARD
+            isSignUp ? signUp() : signIn();
+          }} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#000" />
           ) : (
