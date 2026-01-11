@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   StyleSheet,
   TextInput,
@@ -11,7 +12,8 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-
+import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import EmailActionDialog from '../components/EmailActionDialog';
@@ -38,6 +40,7 @@ export default function AuthScreen({ navigation }: Props) {
   const [showExistsDialog, setShowExistsDialog] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const colorScheme = useColorScheme();
 
 
   // ---------------------------
@@ -195,17 +198,29 @@ export default function AuthScreen({ navigation }: Props) {
         style={styles.bgImage}
       />
       <View style={styles.overlay} />
-
+  {/* Content should respect safe area */}
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar
+        style={colorScheme === "dark" ? "light" : "dark"}
+        translucent
+        backgroundColor="transparent"
+      />
       <KeyboardAvoidingView
-        style={{ flex: 1, justifyContent: "center" }}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingBottom: Platform.OS === "android" ? 120 : 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+
 
       <View style={styles.card}>
         <Text style={styles.title}>{isSignUp ? 'Sign Up' : 'Welcome'}</Text>
@@ -317,17 +332,20 @@ export default function AuthScreen({ navigation }: Props) {
           setIsSignUp(false);
         }}
       />
+    </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#000", justifyContent: "center" },
+  screen: { flex: 1, backgroundColor: "#000" },
+
   bgImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
   card: {
     marginHorizontal: 20,
     padding: 26,
+    paddingBottom: 36, // ✅ ADD THIS
     borderRadius: 22,
     backgroundColor: "rgba(20,20,20,0.65)",
     borderWidth: 1,
