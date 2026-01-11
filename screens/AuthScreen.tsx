@@ -7,7 +7,11 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import EmailActionDialog from '../components/EmailActionDialog';
@@ -192,6 +196,17 @@ export default function AuthScreen({ navigation }: Props) {
       />
       <View style={styles.overlay} />
 
+      <KeyboardAvoidingView
+        style={{ flex: 1, justifyContent: "center" }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+
       <View style={styles.card}>
         <Text style={styles.title}>{isSignUp ? 'Sign Up' : 'Welcome'}</Text>
         <Text style={styles.subtitle}>{isSignUp ? 'Create New Account' : 'back'}</Text>
@@ -283,6 +298,8 @@ export default function AuthScreen({ navigation }: Props) {
         </TouchableOpacity>
 
       </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
 
       <EmailActionDialog
         visible={showEmailDialog}

@@ -15,8 +15,9 @@ import {
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-
+import { Ionicons } from "@expo/vector-icons";
 import { markProfileCompleted } from "../../utils/profileState";
+import { KeyboardAvoidingView, Platform } from "react-native";
 
 
 const PRIMARY = '#f4ff47';
@@ -40,6 +41,14 @@ const goals: { label: Goal; image: any }[] = [
 
 const TOTAL_STEPS = 4;
 const GENDER_CARD_WIDTH = (width - 40 - 14) / 2;
+
+const formatDate = (date: Date) => {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
 export default function ProfileSetupScreen({
   navigation,
   onProfileCompleted,
@@ -51,7 +60,8 @@ export default function ProfileSetupScreen({
   const [goal, setGoal] = useState<Goal | ''>('');
   const [gender, setGender] = useState<Gender | ''>('');
   
-  const [birthdate, setBirthdate] = useState(new Date());
+  const [birthdate, setBirthdate] = useState<Date | null>(null);
+  const [birthdateError, setBirthdateError] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 const weightScrollRef = React.useRef<ScrollView>(null);
   const [firstName, setFirstName] = useState('');
@@ -80,7 +90,7 @@ const heightScrollRef = React.useRef<ScrollView>(null);
     switch (step) {
       case 1: return true;
       case 2: return !!goal;
-      case 3: return heightVal && weightVal;
+      case 3: return heightVal && weightVal && birthdate;
       case 4:
         return (
           gender &&
@@ -145,6 +155,11 @@ React.useEffect(() => {
   };
 
   const handleNext = async () => {
+    if (step === 3 && !birthdate) {
+      setBirthdateError(true);
+      return;
+    }
+
     if (step === 4) {
       if (!username.trim()) return;
       const available = await checkUsernameAvailability();
@@ -178,7 +193,7 @@ React.useEffect(() => {
         phone,
         gender,
         goal,
-        birthdate: birthdate.toISOString().split('T')[0],
+        birthdate: birthdate ? birthdate.toISOString().split("T")[0] : null,
         height: Number(heightVal),
         weight: Number(weightVal),
       });
@@ -235,14 +250,42 @@ React.useEffect(() => {
       case 3:
   return (
     <>
-    {/* BIRTHDATE PICKER */}
-      <TouchableOpacity
-        style={styles.dateCard}
-        onPress={() => setShowDatePicker(true)}
+      {/* BIRTHDATE INPUT */}
+      <Text style={styles.weightLabel}>BirthDate</Text>
+      <View
+        style={[
+          styles.dateInputContainer,
+          birthdateError && styles.dateErrorBorder,
+        ]}
       >
-        <Text style={styles.dateLabel}>Select Birthdate</Text>
-        <Text style={styles.dateValue}>{birthdate.toDateString()}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          onPress={() => setShowDatePicker(true)}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[
+              styles.datePlaceholder,
+              birthdate && styles.dateSelected,
+            ]}
+          >
+            {birthdate ? formatDate(birthdate) : "DD / MM / YYYY"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <Ionicons
+            name="calendar-outline"
+            size={25}
+            color="#f4ff47"
+          />
+        </TouchableOpacity>
+
+      </View>
+
+      {birthdateError && (
+        <Text style={styles.error}>Enter birthdate</Text>
+      )}
 
       <DateTimePickerModal
         isVisible={showDatePicker}
@@ -250,10 +293,12 @@ React.useEffect(() => {
         maximumDate={new Date()}
         onConfirm={(date) => {
           setBirthdate(date);
+          setBirthdateError(false);
           setShowDatePicker(false);
         }}
         onCancel={() => setShowDatePicker(false)}
       />
+
       {/* WEIGHT PICKER */}
       <View style={styles.weightContainer}>
         <Text style={styles.weightLabel}>Weight (kg)</Text>
@@ -408,35 +453,60 @@ React.useEffect(() => {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.container}>
-        <Text style={styles.stepText}>STEP {step} OF {TOTAL_STEPS}</Text>
-        <Text style={styles.title}>{titles[step - 1]}</Text>
-       <ScrollView nestedScrollEnabled>
-  {renderStep()}
-</ScrollView>
 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      >
+        <View style={styles.container}>
+          <Text style={styles.stepText}>STEP {step} OF {TOTAL_STEPS}</Text>
+          <Text style={styles.title}>{titles[step - 1]}</Text>
 
-        <View style={styles.buttonRow}>
-          {step > 1 && (
-            <TouchableOpacity
-              style={[styles.button, styles.sideButton, styles.backButton]}
-              disabled={loading}
-              onPress={() => setStep(step - 1)}
-            >
-              <Text style={[styles.buttonText, { color: '#fff' }]}>Back</Text>
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            style={[styles.button, styles.sideButton, !canProceed && styles.disabled]}
-            disabled={!canProceed || loading}
-            onPress={handleNext}
+          <ScrollView
+            nestedScrollEnabled
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 160 }}
           >
-            {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.buttonText}>{step === 4 ? 'Finish' : 'Next'}</Text>}
-          </TouchableOpacity>
+            {renderStep()}
+          </ScrollView>
+
+          <View style={styles.buttonRow}>
+            {step > 1 && (
+              <TouchableOpacity
+                style={[styles.button, styles.sideButton, styles.backButton]}
+                disabled={loading}
+                onPress={() => setStep(step - 1)}
+              >
+                <Text style={[styles.buttonText, { color: "#fff" }]}>
+                  Back
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                styles.sideButton,
+                !canProceed && styles.disabled,
+              ]}
+              disabled={!canProceed || loading}
+              onPress={handleNext}
+            >
+              {loading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {step === 4 ? "Finish" : "Next"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
+
   );
 }
 
@@ -461,17 +531,9 @@ const styles = StyleSheet.create({
   selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius:18 },
   goalText: { position: 'absolute', bottom: 12, color: '#fff', fontWeight: '800', alignSelf: 'center' },
 
-  genderCard: { flex: 1, backgroundColor: '#111', padding: 20, borderRadius: 16, alignItems: 'center' },
-  selected: { borderWidth: 2, borderColor: PRIMARY },
-  genderText: { color: '#fff', fontSize: 18 },
-
   input: { backgroundColor: '#111', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
   inputError: { borderColor: '#ff4d4d', borderWidth: 1 },
   error: { color: '#ff4d4d', marginBottom: 5 },
-
-  dateCard: { backgroundColor: '#111', padding: 16, borderRadius: 16, marginBottom:0 },
-  dateLabel: { color: '#fff', fontSize:18, fontWeight:700, marginBottom:10 },
-  dateValue: { color: PRIMARY, fontWeight: '700', fontSize:12 },
 
   button: { backgroundColor: PRIMARY, padding: 18, borderRadius: 18, alignItems: 'center', marginBottom: 20 },
   disabled: { opacity: 0.4 },
@@ -517,18 +579,6 @@ weightLabel: {
   fontWeight: '700',
   fontSize:16,
   padding:16
-},
-
-picker: {
-  color: '#fff',
-},
-
-pickerItem: {
-  color: '#fff',
-  fontSize: 20,
-},
-heightContainer: {
-  alignItems: 'center',
 },
 
 heightWheel: {
@@ -643,5 +693,36 @@ genderSelected: {
   borderColor: PRIMARY,
   borderRadius:22
 },
+
+dateInputContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#111",
+  borderRadius: 16,
+  paddingHorizontal: 16,
+  height: 56,
+  marginBottom: 6,
+},
+
+datePlaceholder: {
+  color: "#888",
+  fontSize: 16,
+},
+
+dateSelected: {
+  color: PRIMARY,
+  fontWeight: "700",
+},
+
+calendarIcon: {
+  fontSize: 20,
+  marginLeft: 10,
+},
+
+dateErrorBorder: {
+  borderWidth: 1,
+  borderColor: "#ff4d4d",
+},
+
 
 });
