@@ -114,6 +114,7 @@ export default function AuthScreen({ navigation }: Props) {
   // SIGN IN
   // ---------------------------
   async function signIn() {
+    Keyboard.dismiss(); // ✅ always first
     const validEmail = validateEmail(email);
     const validPass = validatePassword(password);
     if (!validEmail || !validPass) return;
@@ -142,6 +143,7 @@ export default function AuthScreen({ navigation }: Props) {
   // SIGN UP
   // ---------------------------
   async function signUp() {
+    Keyboard.dismiss(); // ✅ always first
     const validEmail = validateEmail(email);
     const validPass = validatePassword(password);
     const validConfirm = validateConfirmPassword(confirmPassword);
@@ -176,6 +178,7 @@ export default function AuthScreen({ navigation }: Props) {
   // RESET PASSWORD
   // ---------------------------
   async function resetPassword() {
+    Keyboard.dismiss(); // ✅ always first
     const validEmail = validateEmail(email);
     if (!validEmail) return;
 
