@@ -13,10 +13,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "statusBar": {
-      "style": "dark",
-      "backgroundColor": "#fff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ayushupasetech.myapp",
@@ -25,6 +21,12 @@
       }
     },
     "android": {
+      "statusBar": {
+        "translucent": true,
+        "backgroundColor": "transparent",
+        "style": "auto"
+      },
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -60,9 +62,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "f81335df-f028-4520-b328-624e4addb265"
+        "projectId": "9f314cc1-68c6-4402-a7df-36042e8b7762"
       }
     },
-    "owner": "ayushupase369.1"
+    "owner": "ayushupase369.2"
   }
 }
