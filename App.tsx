@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Linking, ActivityIndicator, View, StatusBar, Platform } from 'react-native';
-import { NavigationContainer, LinkingOptions, createNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { supabase } from './lib/supabase';
@@ -12,14 +12,12 @@ import TabNavigator from "./navigation/TabNavigator";
 import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
-import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
 import { checkProfileCompletion } from "./utils/profileState";
 import { navigationRef } from "./navigation/navigationRef";
 import {
   markAuthStarted,
   hasAuthStarted,
   shouldShowVerifyDialog,
-  clearAuthStarted,
 } from "./utils/authState";
 
 
@@ -260,19 +258,6 @@ useEffect(() => {
               setNavigationReady(true);
             }}
           >
-            <VerificationSuccessDialog
-              visible={showVerifyDialog}
-              onClose={async () => {
-                setShowVerifyDialog(false);
-                await clearAuthStarted();
-
-                navigationRef.reset({
-                  index: 0,
-                  routes: [{ name: "Auth" }],
-                });
-              }}
-
-            />
 
               <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {!session && !openedFromVerification && (

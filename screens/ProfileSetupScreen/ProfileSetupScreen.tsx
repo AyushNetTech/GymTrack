@@ -18,6 +18,8 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Ionicons } from "@expo/vector-icons";
 import { markProfileCompleted } from "../../utils/profileState";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import ProfileSetupSuccessDialog from '../../components/ProfileSetupSuccessDialog';
+import { Keyboard } from "react-native";
 
 const PRIMARY = '#f4ff47';
 const BG = '#000';
@@ -49,13 +51,12 @@ const formatDate = (date: Date) => {
 };
 
 export default function ProfileSetupScreen({
-  navigation,
   onProfileCompleted,
 }: any) {
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  const [showSuccess, setShowSuccess] = useState(false);
   const [goal, setGoal] = useState<Goal | ''>('');
   const [gender, setGender] = useState<Gender | ''>('');
   
@@ -206,7 +207,10 @@ React.useEffect(() => {
         }
       } else {
           await markProfileCompleted();
-          onProfileCompleted(); // 🔥 THIS IS THE KEY
+          Keyboard.dismiss(); 
+          setTimeout(() => {
+            setShowSuccess(true);
+          }, 150); 
         }
 
 
@@ -490,7 +494,7 @@ React.useEffect(() => {
                 styles.sideButton,
                 !canProceed && styles.disabled,
               ]}
-              disabled={!canProceed || loading}
+              disabled={!canProceed || loading || showSuccess}
               onPress={handleNext}
             >
               {loading ? (
@@ -504,6 +508,13 @@ React.useEffect(() => {
           </View>
         </View>
       </KeyboardAvoidingView>
+      <ProfileSetupSuccessDialog
+        visible={showSuccess}
+        onAutoClose={() => {
+          setShowSuccess(false);
+          onProfileCompleted(); // ✅ ONLY HERE
+        }}
+      />
     </SafeAreaView>
 
   );
