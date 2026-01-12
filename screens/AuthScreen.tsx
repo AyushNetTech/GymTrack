@@ -15,7 +15,6 @@ import {
 import { Keyboard } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
-import { useColorScheme } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import EmailActionDialog from '../components/EmailActionDialog';
@@ -42,7 +41,6 @@ export default function AuthScreen({ navigation }: Props) {
   const [showExistsDialog, setShowExistsDialog] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const colorScheme = useColorScheme();
 
 
   // ---------------------------
@@ -206,10 +204,11 @@ export default function AuthScreen({ navigation }: Props) {
   {/* Content should respect safe area */}
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar
-        style={colorScheme === "dark" ? "light" : "dark"}
+        style="light"
         translucent
         backgroundColor="transparent"
       />
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
