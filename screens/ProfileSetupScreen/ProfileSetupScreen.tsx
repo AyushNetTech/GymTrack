@@ -32,7 +32,7 @@ const DEFAULT_HEIGHT = 170;
 
 type Gender = 'Male' | 'Female';
 type Goal = 'Lose Weight' | 'Gain Weight' | 'Build Muscles' | 'Stay Fit';
-const DEFAULT_WEIGHT = 70;
+const DEFAULT_WEIGHT = 50;
 const goals: { label: Goal; image: any }[] = [
   { label: 'Lose Weight', image: require('../../assets/waitloss.jpeg') },
   { label: 'Gain Weight', image: require('../../assets/bulk.jpeg') },
@@ -107,6 +107,7 @@ const heightScrollRef = React.useRef<ScrollView>(null);
   React.useEffect(() => {
   const index = heights.indexOf(DEFAULT_HEIGHT);
   if (index !== -1) {
+    setHeightVal(String(DEFAULT_HEIGHT)); // ✅ force UI value
     requestAnimationFrame(() => {
       heightScrollRef.current?.scrollTo({
         y: index * ITEM_HEIGHT,
@@ -116,9 +117,11 @@ const heightScrollRef = React.useRef<ScrollView>(null);
   }
 }, []);
 
+
 React.useEffect(() => {
   const index = weights.indexOf(DEFAULT_WEIGHT);
   if (index !== -1) {
+    setWeightVal(String(DEFAULT_WEIGHT)); // ✅ force UI value
     requestAnimationFrame(() => {
       weightScrollRef.current?.scrollTo({
         x: index * 70,
@@ -127,6 +130,7 @@ React.useEffect(() => {
     });
   }
 }, []);
+
 
   const checkUsernameAvailability = async () => {
     if (!username.trim()) return false;
