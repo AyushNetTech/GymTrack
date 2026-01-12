@@ -193,7 +193,7 @@ export default function ProfileSetupScreen({ onProfileCompleted }: any) {
       case 1:
         return (
           <ImageBackground
-            source={require('../../assets/setprofileintro.jpeg')}
+            source={require('../../assets/setprofileintro.png')}
             style={styles.hero}
           >
             <Text style={styles.heroTitle}>Transform Your Body</Text>
