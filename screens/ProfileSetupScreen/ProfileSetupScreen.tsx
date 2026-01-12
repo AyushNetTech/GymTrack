@@ -24,7 +24,7 @@ import ProfileSetupSuccessDialog from '../../components/ProfileSetupSuccessDialo
 import { RulerPicker } from 'react-native-ruler-picker';
 
 const PRIMARY = '#f4ff47';
-const BG = '#000';
+const BG = '#111';
 const { width, height } = Dimensions.get('window');
 const GAP = 20;
 const BOX_SIZE = (width - GAP * 3) / 2;
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius: 18 },
   goalText: { position: 'absolute', bottom: 12, color: '#fff', fontWeight: '800', alignSelf: 'center' },
 
-  input: { backgroundColor: '#111', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
+  input: { backgroundColor: '#000', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
   inputError: { borderColor: '#ff4d4d', borderWidth: 1 },
   error: { color: '#ff4d4d', marginBottom: 5 },
 
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   genderLabel: { alignSelf: 'center', marginBottom: 14, color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1 },
   genderSelected: { borderWidth: 3, borderColor: PRIMARY, borderRadius: 22 },
 
-  dateInputContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "#111", borderRadius: 16, paddingHorizontal: 16, height: 56, marginBottom: 6 },
+  dateInputContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "#000", borderRadius: 16, paddingHorizontal: 16, height: 56, marginBottom: 6 },
   datePlaceholder: { color: "#888", fontSize: 16 },
   dateSelected: { color: PRIMARY, fontWeight: "700" },
   dateErrorBorder: { borderWidth: 1, borderColor: "#ff4d4d" },
