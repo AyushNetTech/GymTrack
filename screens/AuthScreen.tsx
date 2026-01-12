@@ -21,6 +21,8 @@ import EmailActionDialog from '../components/EmailActionDialog';
 import EmailExistsDialog from '../components/EmailExistsDialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App'; // adjust path if needed
+import { markIntroCompleted } from "../utils/authState";
+
 
 type AuthScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
 
@@ -130,11 +132,7 @@ export default function AuthScreen({ navigation }: Props) {
     if (!data.session)
       return alert("Please verify your email before signing in.");
 
-    // Navigate to Home after successful login
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+    await markIntroCompleted();
   }
 
   // ---------------------------
@@ -164,6 +162,8 @@ export default function AuthScreen({ navigation }: Props) {
       setShowExistsDialog(true);
       return;
     }
+
+    await markIntroCompleted();
 
     setEmailDialogMessage(
       'Verification email sent! Please verify to activate your account.'

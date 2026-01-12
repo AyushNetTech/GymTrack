@@ -14,6 +14,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
 import { checkProfileCompletion } from "./utils/profileState";
 import { navigationRef } from "./navigation/navigationRef";
+import { hasCompletedIntro } from "./utils/authState";
+
 import {
   markAuthStarted,
   hasAuthStarted,
@@ -49,14 +51,18 @@ export default function App() {
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
 const [openedFromVerification, setOpenedFromVerification] = useState(false);
 const [linkingReady, setLinkingReady] = useState(false);
-const [navigationReady, setNavigationReady] = useState(false);
 const [authStateReady, setAuthStateReady] = useState(false);
 const [profileChecked, setProfileChecked] = useState(false);
 const [profileCompleted, setProfileCompleted] = useState(false);
+const [introCompleted, setIntroCompleted] = useState(false);
+
 
 
 useEffect(() => {
   const restoreAuthState = async () => {
+    const introDone = await hasCompletedIntro();
+    setIntroCompleted(introDone);
+
     const started = await hasAuthStarted();
     const showDialog = await shouldShowVerifyDialog();
 
@@ -143,7 +149,7 @@ useEffect(() => {
 
   
 
-  const { data, error } = await supabase.auth.setSession({
+  const { error } = await supabase.auth.setSession({
     access_token,
     refresh_token,
   });
@@ -254,13 +260,10 @@ useEffect(() => {
           <NavigationContainer
             linking={linking}
             ref={navigationRef}
-            onReady={() => {
-              setNavigationReady(true);
-            }}
           >
 
               <Stack.Navigator screenOptions={{ headerShown: false }}>
-                {!session && !openedFromVerification && (
+                {!session && !introCompleted && !openedFromVerification && (
                   <Stack.Screen name="Intro" component={IntroScreen} />
                 )}
 
