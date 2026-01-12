@@ -18,7 +18,7 @@ import { emitter } from "../lib/emitter";
 import LoadingScreen from "../components/LoadingScreen";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useToast } from "../components/ToastProvider";
-import { navigationRef } from "../App";
+import { navigationRef } from "../navigation/navigationRef";
 import { clearProfileCompleted } from "../utils/profileState";
 import { clearAuthStarted } from "../utils/authState";
 

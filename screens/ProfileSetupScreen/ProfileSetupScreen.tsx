@@ -11,14 +11,13 @@ import {
   TextInput,
   StatusBar,
   ImageBackground,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Ionicons } from "@expo/vector-icons";
 import { markProfileCompleted } from "../../utils/profileState";
 import { KeyboardAvoidingView, Platform } from "react-native";
-
 
 const PRIMARY = '#f4ff47';
 const BG = '#000';

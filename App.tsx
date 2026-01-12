@@ -14,6 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
 import VerificationSuccessDialog from "./components/VerificationSuccessDialog";
 import { checkProfileCompletion } from "./utils/profileState";
+import { navigationRef } from "./navigation/navigationRef";
 import {
   markAuthStarted,
   hasAuthStarted,
@@ -31,7 +32,6 @@ export type RootStackParamList = {
   ProfileSetup: undefined;
 };
 
-export const navigationRef = createNavigationContainerRef<RootStackParamList>()
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 const linking: LinkingOptions<RootStackParamList> = {
