@@ -11,28 +11,29 @@ import {
   TextInput,
   StatusBar,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../../lib/supabase';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Ionicons } from "@expo/vector-icons";
+import { supabase } from '../../lib/supabase';
 import { markProfileCompleted } from "../../utils/profileState";
-import { KeyboardAvoidingView, Platform } from "react-native";
 import ProfileSetupSuccessDialog from '../../components/ProfileSetupSuccessDialog';
-import { Keyboard } from "react-native";
+import { RulerPicker } from 'react-native-ruler-picker';
 
 const PRIMARY = '#f4ff47';
 const BG = '#000';
 const { width, height } = Dimensions.get('window');
 const GAP = 20;
 const BOX_SIZE = (width - GAP * 3) / 2;
-const ITEM_HEIGHT = 50;
-const DEFAULT_HEIGHT = 170;
-
 
 type Gender = 'Male' | 'Female';
 type Goal = 'Lose Weight' | 'Gain Weight' | 'Build Muscles' | 'Stay Fit';
+const DEFAULT_HEIGHT = 170;
 const DEFAULT_WEIGHT = 50;
+
 const goals: { label: Goal; image: any }[] = [
   { label: 'Lose Weight', image: require('../../assets/waitloss.jpeg') },
   { label: 'Gain Weight', image: require('../../assets/bulk.jpeg') },
@@ -50,34 +51,27 @@ const formatDate = (date: Date) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
-export default function ProfileSetupScreen({
-  onProfileCompleted,
-}: any) {
-
+export default function ProfileSetupScreen({ onProfileCompleted }: any) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [goal, setGoal] = useState<Goal | ''>('');
   const [gender, setGender] = useState<Gender | ''>('');
-  
   const [birthdate, setBirthdate] = useState<Date | null>(null);
   const [birthdateError, setBirthdateError] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-const weightScrollRef = React.useRef<ScrollView>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
-const [heightVal, setHeightVal] = useState(String(DEFAULT_HEIGHT));
-const heightScrollRef = React.useRef<ScrollView>(null);
-
+  const [heightVal, setHeightVal] = useState(String(DEFAULT_HEIGHT));
   const [weightVal, setWeightVal] = useState(String(DEFAULT_WEIGHT));
-
-  const weights = Array.from({ length: 201 }, (_, i) => i + 30); // 30kg–230kg
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
-  const heights = Array.from({ length: 121 }, (_, i) => i + 120); // 120cm–240cm
+
+  const weights = Array.from({ length: 201 }, (_, i) => i + 30); // 30–230 kg
+  const heights = Array.from({ length: 121 }, (_, i) => i + 120); // 120–240 cm
 
   const titles = [
     'Set Your Profile First',
@@ -103,34 +97,6 @@ const heightScrollRef = React.useRef<ScrollView>(null);
       default: return false;
     }
   })();
-
-  React.useEffect(() => {
-  const index = heights.indexOf(DEFAULT_HEIGHT);
-  if (index !== -1) {
-    setHeightVal(String(DEFAULT_HEIGHT)); // ✅ force UI value
-    requestAnimationFrame(() => {
-      heightScrollRef.current?.scrollTo({
-        y: index * ITEM_HEIGHT,
-        animated: false,
-      });
-    });
-  }
-}, []);
-
-
-React.useEffect(() => {
-  const index = weights.indexOf(DEFAULT_WEIGHT);
-  if (index !== -1) {
-    setWeightVal(String(DEFAULT_WEIGHT)); // ✅ force UI value
-    requestAnimationFrame(() => {
-      weightScrollRef.current?.scrollTo({
-        x: index * 70,
-        animated: false,
-      });
-    });
-  }
-}, []);
-
 
   const checkUsernameAvailability = async () => {
     if (!username.trim()) return false;
@@ -210,13 +176,10 @@ React.useEffect(() => {
           setUsernameError(error.message);
         }
       } else {
-          await markProfileCompleted();
-          Keyboard.dismiss(); 
-          setTimeout(() => {
-            setShowSuccess(true);
-          }, 150); 
-        }
-
+        await markProfileCompleted();
+        Keyboard.dismiss(); 
+        setTimeout(() => setShowSuccess(true), 150);
+      }
 
     } catch (err: any) {
       setUsernameError(err.message || 'An error occurred');
@@ -237,6 +200,7 @@ React.useEffect(() => {
             <Text style={styles.heroSub}>Excuses don’t burn calories.</Text>
           </ImageBackground>
         );
+
       case 2:
         return (
           <View style={styles.grid}>
@@ -254,188 +218,116 @@ React.useEffect(() => {
             ))}
           </View>
         );
+
       case 3:
-  return (
-    <>
-      {/* BIRTHDATE INPUT */}
-      <Text style={styles.weightLabel}>BirthDate</Text>
-      <View
-        style={[
-          styles.dateInputContainer,
-          birthdateError && styles.dateErrorBorder,
-        ]}
-      >
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={() => setShowDatePicker(true)}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.datePlaceholder,
-              birthdate && styles.dateSelected,
-            ]}
-          >
-            {birthdate ? formatDate(birthdate) : "DD / MM / YYYY"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Ionicons
-            name="calendar-outline"
-            size={25}
-            color="#f4ff47"
-          />
-        </TouchableOpacity>
-
-      </View>
-
-      {birthdateError && (
-        <Text style={styles.error}>Enter birthdate</Text>
-      )}
-
-      <DateTimePickerModal
-        isVisible={showDatePicker}
-        mode="date"
-        maximumDate={new Date()}
-        onConfirm={(date) => {
-          setBirthdate(date);
-          setBirthdateError(false);
-          setShowDatePicker(false);
-        }}
-        onCancel={() => setShowDatePicker(false)}
-      />
-
-      {/* WEIGHT PICKER */}
-      <View style={styles.weightContainer}>
-        <Text style={styles.weightLabel}>Weight (kg)</Text>
-
-        <View style={styles.weightScale}>
-          <View style={styles.weightIndicator} />
-
-          <ScrollView
-            ref={weightScrollRef}
-            horizontal
-            nestedScrollEnabled
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={70}
-            decelerationRate="fast"
-            contentContainerStyle={{ paddingHorizontal: width / 2 - 35 }}
-            onMomentumScrollEnd={(e) => {
-              const index = Math.round(e.nativeEvent.contentOffset.x / 70);
-              setWeightVal(String(weights[index]));
-            }}
-          >
-            {weights.map((w) => (
-              <View key={w} style={styles.weightItem}>
-                <Text
-                  style={[
-                    styles.weightText,
-                    weightVal === String(w) && styles.weightActive,
-                  ]}
-                >
-                  {w}
+        return (
+          <>
+            {/* BIRTHDATE INPUT */}
+            <Text style={styles.weightLabel}>BirthDate</Text>
+            <View style={[styles.dateInputContainer, birthdateError && styles.dateErrorBorder]}>
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => setShowDatePicker(true)} activeOpacity={0.8}>
+                <Text style={[styles.datePlaceholder, birthdate && styles.dateSelected]}>
+                  {birthdate ? formatDate(birthdate) : "DD / MM / YYYY"}
                 </Text>
-                <View style={styles.tick} />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <Ionicons name="calendar-outline" size={25} color={PRIMARY} />
+              </TouchableOpacity>
+            </View>
+            {birthdateError && <Text style={styles.error}>Enter birthdate</Text>}
 
-      </View>
+            <DateTimePickerModal
+              isVisible={showDatePicker}
+              mode="date"
+              maximumDate={new Date()}
+              onConfirm={(date) => {
+                setBirthdate(date);
+                setBirthdateError(false);
+                setShowDatePicker(false);
+              }}
+              onCancel={() => setShowDatePicker(false)}
+            />
 
-      {/* HEIGHT PICKER */}
-      <View style={styles.pickerCard}>
-        <Text style={styles.pickerLabel}>Height (cm)</Text>
+            {/* WEIGHT PICKER */}
+            <View style={styles.weightContainer}>
+              <Text style={styles.weightLabel}>Weight (kg)</Text>
+              <RulerPicker
+                min={30}
+                max={230}
+                step={1}
+                initialValue={Number(weightVal)}
+                onValueChange={(v) => setWeightVal(String(v))}
+                unit="kg"
+                width={width - 40}
+                height={120}
+                orientation="horizontal"
+                indicatorColor={PRIMARY}
+                indicatorWidth={4}
+                indicatorHeight={60}
+                smoothScroll
+                scrollAnimation
+                valueTextStyle={{ color: PRIMARY, fontSize: 26, fontWeight: '900' }}
+                unitTextStyle={{ color: '#aaa', fontSize: 14 }}
+                tickColor="#555"
+                majorTickColor={PRIMARY}
+                majorTickHeight={30}
+                minorTickHeight={15}
+                backgroundColor="#0f0f0f"
+              />
+            </View>
 
-        <View style={styles.heightWheel}>
-          <View style={styles.heightIndicator} />
-
-          <ScrollView
-            ref={heightScrollRef}
-            nestedScrollEnabled
-            showsVerticalScrollIndicator={false}
-            snapToInterval={ITEM_HEIGHT}
-            decelerationRate="fast"
-            contentContainerStyle={{ paddingVertical: 75 }}
-            onMomentumScrollEnd={(e) => {
-              const index = Math.min(
-                heights.length - 1,
-                Math.max(
-                  0,
-                  Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT)
-                )
-              );
-              setHeightVal(String(heights[index]));
-            }}
-          >
-            {heights.map((h) => (
-              <View key={h} style={styles.heightItem}>
-                <Text
-                  style={[
-                    styles.heightText,
-                    heightVal === String(h) && styles.heightActive,
-                  ]}
-                >
-                  {h}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      </View>
-
-    </>
-  );
+            {/* HEIGHT PICKER */}
+            <View style={styles.weightContainer}>
+              <Text style={styles.weightLabel}>Height (cm)</Text>
+              <RulerPicker
+                min={120}
+                max={240}
+                step={1}
+                initialValue={Number(heightVal)}
+                onValueChange={(v) => setHeightVal(String(v))}
+                unit="cm"
+                width={width - 40}
+                height={120}
+                orientation="horizontal"
+                indicatorColor={PRIMARY}
+                indicatorWidth={4}
+                indicatorHeight={60}
+                smoothScroll
+                scrollAnimation
+                valueTextStyle={{ color: PRIMARY, fontSize: 26, fontWeight: '900' }}
+                unitTextStyle={{ color: '#aaa', fontSize: 14 }}
+                tickColor="#555"
+                majorTickColor={PRIMARY}
+                majorTickHeight={30}
+                minorTickHeight={15}
+                backgroundColor="#0f0f0f"
+              />
+            </View>
+          </>
+        );
 
       case 4:
         return (
           <>
             <View style={styles.genderRow}>
-              <View
-                style={[
-                  styles.genderBorderWrapper,
-                  gender === 'Male' && styles.genderSelected,
-                ]}
-              >
-                <TouchableOpacity
-                  style={styles.genderImageCard}
-                  onPress={() => setGender('Male')}
-                  activeOpacity={0.9}
-                >
-                  <ImageBackground
-                    source={require('../../assets/Male.jpg')}
-                    style={styles.genderBg}
-                  >
+              <View style={[styles.genderBorderWrapper, gender === 'Male' && styles.genderSelected]}>
+                <TouchableOpacity style={styles.genderImageCard} onPress={() => setGender('Male')} activeOpacity={0.9}>
+                  <ImageBackground source={require('../../assets/Male.jpg')} style={styles.genderBg}>
                     <View style={styles.genderOverlay} />
                     <Text style={styles.genderLabel}>MALE</Text>
                   </ImageBackground>
                 </TouchableOpacity>
               </View>
 
-              <View
-                style={[
-                  styles.genderBorderWrapper,
-                  gender === 'Female' && styles.genderSelected,
-                ]}
-              >
-                <TouchableOpacity
-                  style={styles.genderImageCard}
-                  onPress={() => setGender('Female')}
-                  activeOpacity={0.9}
-                >
-                  <ImageBackground
-                    source={require('../../assets/Female.jpg')}
-                    style={styles.genderBg}
-                  >
+              <View style={[styles.genderBorderWrapper, gender === 'Female' && styles.genderSelected]}>
+                <TouchableOpacity style={styles.genderImageCard} onPress={() => setGender('Female')} activeOpacity={0.9}>
+                  <ImageBackground source={require('../../assets/Female.jpg')} style={styles.genderBg}>
                     <View style={styles.genderOverlay} />
                     <Text style={styles.genderLabel}>FEMALE</Text>
                   </ImageBackground>
                 </TouchableOpacity>
               </View>
-
             </View>
-
 
             <Input placeholder="First Name" value={firstName} onChangeText={setFirstName} />
             <Input placeholder="Last Name" value={lastName} onChangeText={setLastName} />
@@ -443,7 +335,7 @@ React.useEffect(() => {
               placeholder="Username"
               value={username}
               autoCapitalize="none"
-              onChangeText={(t: string) => {
+              onChangeText={(t) => {
                 setUsername(t.toLowerCase());
                 setUsernameError(null);
                 setUsernameAvailable(null);
@@ -451,7 +343,13 @@ React.useEffect(() => {
               style={(usernameAvailable === false || usernameError) && styles.inputError}
             />
             {usernameError && <Text style={styles.error}>{usernameError}</Text>}
-            <Input placeholder="Phone" value={phone} onChangeText={setPhone} />
+            <Input
+              placeholder="Phone"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              returnKeyType="done"
+            />
           </>
         );
     }
@@ -460,54 +358,23 @@ React.useEffect(() => {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" />
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}>
         <View style={styles.container}>
           <Text style={styles.stepText}>STEP {step} OF {TOTAL_STEPS}</Text>
           <Text style={styles.title}>{titles[step - 1]}</Text>
 
-          <ScrollView
-            nestedScrollEnabled
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 160 }}
-          >
+          <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 160 }}>
             {renderStep()}
           </ScrollView>
 
           <View style={styles.buttonRow}>
             {step > 1 && (
-              <TouchableOpacity
-                style={[styles.button, styles.sideButton, styles.backButton]}
-                disabled={loading}
-                onPress={() => setStep(step - 1)}
-              >
-                <Text style={[styles.buttonText, { color: "#fff" }]}>
-                  Back
-                </Text>
+              <TouchableOpacity style={[styles.button, styles.sideButton, styles.backButton]} disabled={loading} onPress={() => setStep(step - 1)}>
+                <Text style={[styles.buttonText, { color: "#fff" }]}>Back</Text>
               </TouchableOpacity>
             )}
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.sideButton,
-                !canProceed && styles.disabled,
-              ]}
-              disabled={!canProceed || loading || showSuccess}
-              onPress={handleNext}
-            >
-              {loading ? (
-                <ActivityIndicator color="#000" />
-              ) : (
-                <Text style={styles.buttonText}>
-                  {step === 4 ? "Finish" : "Next"}
-                </Text>
-              )}
+            <TouchableOpacity style={[styles.button, styles.sideButton, !canProceed && styles.disabled]} disabled={!canProceed || loading || showSuccess} onPress={handleNext}>
+              {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.buttonText}>{step === 4 ? "Finish" : "Next"}</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -516,21 +383,18 @@ React.useEffect(() => {
         visible={showSuccess}
         onAutoClose={() => {
           setShowSuccess(false);
-          onProfileCompleted(); // ✅ ONLY HERE
+          onProfileCompleted();
         }}
       />
     </SafeAreaView>
-
   );
 }
 
-const Input = (props: any) => (
-  <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor="#888" />
-);
+const Input = (props: any) => <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor="#888" />;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
-  container: { flex: 1, padding: 20, paddingTop: 70 },
+  container: { flex: 1, padding: 20, paddingTop: 50 },
   stepText: { color: '#777', fontSize: 12 },
   title: { color: '#fff', fontSize: 30, fontWeight: '900', marginBottom: 10 },
 
@@ -540,9 +404,9 @@ const styles = StyleSheet.create({
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   goalBox: { width: BOX_SIZE, height: BOX_SIZE, borderRadius: 18, overflow: 'hidden', marginBottom: GAP },
-  goalImg: { width: '100%', height: '100%'},
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius:18 },
-  selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius:18 },
+  goalImg: { width: '100%', height: '100%' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 18 },
+  selectedRing: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: PRIMARY, borderRadius: 18 },
   goalText: { position: 'absolute', bottom: 12, color: '#fff', fontWeight: '800', alignSelf: 'center' },
 
   input: { backgroundColor: '#111', borderRadius: 16, padding: 18, color: '#fff', marginBottom: 10 },
@@ -553,190 +417,23 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
   buttonText: { fontSize: 18, fontWeight: '900', color: '#000' },
   backButton: { backgroundColor: '#333' },
-
   buttonRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 20 },
   sideButton: { flex: 1 },
-  weightContainer: {
-  marginTop: 0,
-},
 
+  weightContainer: { marginTop: 0 },
 
-weightText: {
-  fontSize: 22,
-  color: '#666',
-  fontWeight: '600',
-},
+  weightLabel: { color: '#fff', fontWeight: '700', fontSize: 16, padding: 16 },
 
-weightActive: {
-  color: PRIMARY,
-  fontSize: 25,
-  fontWeight: '900',
-},
+  genderRow: { flexDirection: 'row', gap: 14, marginBottom: 20 },
+  genderImageCard: { width: '100%', height: 150, borderRadius: 22, backgroundColor: '#111', overflow: 'hidden' },
+  genderBorderWrapper: { width: GENDER_CARD_WIDTH, borderRadius: 22 },
+  genderBg: { flex: 1, justifyContent: 'flex-end' },
+  genderOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.2)' },
+  genderLabel: { alignSelf: 'center', marginBottom: 14, color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1 },
+  genderSelected: { borderWidth: 3, borderColor: PRIMARY, borderRadius: 22 },
 
-
-pickerCard: {
-  backgroundColor: '#111',
-  borderRadius: 16,
-  padding: 16,
-  marginBottom: 0,
-},
-
-pickerLabel: {
-  color: '#fff',
-  marginBottom: 5,
-  fontWeight: '700',
-  fontSize:18
-},
-
-weightLabel: {
-  color: '#fff',
-  fontWeight: '700',
-  fontSize:16,
-  padding:16
-},
-
-heightWheel: {
-  height: 200,
-  width: '100%',
-  backgroundColor: '#0f0f0f',
-  borderRadius: 20,
-  overflow: 'hidden',
-},
-
-heightItem: {
-  height: 50,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-
-heightText: {
-  fontSize: 20,
-  color: '#666',
-  fontWeight: '600',
-},
-
-heightActive: {
-  color: PRIMARY,
-  fontSize: 28,
-  fontWeight: '900',
-},
-
-heightIndicator: {
-  position: 'absolute',
-  top: 75,
-  left: 0,
-  right: 0,
-  height: 50,
-  borderTopWidth: 1,
-  borderBottomWidth: 1,
-  borderColor: PRIMARY,
-  zIndex: 10,
-},
-
-weightScale: {
-  marginBottom:10,
-  height: 100,
-  backgroundColor: '#0f0f0f',
-  borderRadius: 20,
-  justifyContent: 'center',
-},
-
-weightItem: {
-  width: 70,
-  alignItems: 'center',
-},
-
-tick: {
-  width: 2,
-  height: 20,
-  backgroundColor: '#444',
-  marginTop: 6,
-},
-
-weightIndicator: {
-  position: 'absolute',
-  left: width / 2 - 1.5, // ⭐ exact center of screen
-  top: 30,
-  bottom: 10,
-  width: 4,
-  backgroundColor: PRIMARY,
-  zIndex: 10,
-},
-
-genderRow: {
-  flexDirection: 'row',
-  gap: 14,
-  marginBottom: 20,
-},
-
-genderImageCard: {
-  width: '100%',
-  height: 150,
-  borderRadius: 22,
-  backgroundColor: '#111',
-  overflow: 'hidden',
-},
-
-genderBorderWrapper: {
-  width: GENDER_CARD_WIDTH,
-  borderRadius: 22,
-},
-
-
-genderBg: {
-  flex: 1,
-  justifyContent: 'flex-end',
-},
-
-genderOverlay: {
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: 'rgba(0, 0, 0, 0.2)',
-},
-
-genderLabel: {
-  alignSelf: 'center',
-  marginBottom: 14,
-  color: '#fff',
-  fontSize: 18,
-  fontWeight: '900',
-  letterSpacing: 1,
-},
-
-genderSelected: {
-  borderWidth: 3,
-  borderColor: PRIMARY,
-  borderRadius:22
-},
-
-dateInputContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#111",
-  borderRadius: 16,
-  paddingHorizontal: 16,
-  height: 56,
-  marginBottom: 6,
-},
-
-datePlaceholder: {
-  color: "#888",
-  fontSize: 16,
-},
-
-dateSelected: {
-  color: PRIMARY,
-  fontWeight: "700",
-},
-
-calendarIcon: {
-  fontSize: 20,
-  marginLeft: 10,
-},
-
-dateErrorBorder: {
-  borderWidth: 1,
-  borderColor: "#ff4d4d",
-},
-
-
+  dateInputContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "#111", borderRadius: 16, paddingHorizontal: 16, height: 56, marginBottom: 6 },
+  datePlaceholder: { color: "#888", fontSize: 16 },
+  dateSelected: { color: PRIMARY, fontWeight: "700" },
+  dateErrorBorder: { borderWidth: 1, borderColor: "#ff4d4d" },
 });
