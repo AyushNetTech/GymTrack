@@ -171,29 +171,6 @@ export default function AuthScreen({ navigation }: Props) {
     setShowEmailDialog(true);
   }
 
-
-  // ---------------------------
-  // RESET PASSWORD
-  // ---------------------------
-  async function resetPassword() {
-    Keyboard.dismiss(); // ✅ always first
-    const validEmail = validateEmail(email);
-    if (!validEmail) return;
-
-    setLoading(true);
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'myapp://reset-password',
-    });
-
-    setLoading(false);
-
-    setEmailDialogMessage(
-      'If an account exists for this email, you will receive a password reset link.'
-    );
-    setShowEmailDialog(true);
-  }
-
   return (
     <View style={styles.screen}>
       <Image
@@ -300,7 +277,12 @@ export default function AuthScreen({ navigation }: Props) {
         </TouchableOpacity>
 
         {!isSignUp && (
-          <TouchableOpacity onPress={resetPassword}>
+          <TouchableOpacity
+            onPress={() => {
+              Keyboard.dismiss();
+              navigation.navigate("ResetPassword");
+            }}
+          >
             <Text style={styles.forgot}>Forgot Password?</Text>
           </TouchableOpacity>
         )}

@@ -38,7 +38,6 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['myapp://'],
   config: {
     screens: {
-      ResetPassword: 'reset-password',
       ProfileSetup: 'profile-setup',
     },
   },
@@ -170,21 +169,6 @@ useEffect(() => {
   useEffect(() => {
   const handleUrl = async ({ url }: { url: string }) => {
 
-    // 1️⃣ RESET PASSWORD (highest priority)
-    if (url.includes("reset-password")) {
-      // Alert.alert("reset password")
-      navigationRef.isReady() &&
-        navigationRef.reset({
-          index: 0,
-          routes: [{ name: "ResetPassword", params: { url } }],
-        });
-
-      return;
-    }
-
-    // 2️⃣ EMAIL VERIFICATION
-
-
       if (url.includes("auth/callback")) {
         // Alert.alert("Verification Link Opened");
 
@@ -269,13 +253,10 @@ useEffect(() => {
 
                 {!session && <Stack.Screen name="Auth" component={AuthScreen} />}
 
-                {!session && (
-                  <Stack.Screen
+                <Stack.Screen
                     name="ResetPassword"
                     component={ResetPasswordScreen}
-                    options={{ presentation: "modal" }}
-                  />
-                )}
+                />
 
                 {session && !profileCompleted && (
                   <Stack.Screen name="ProfileSetup">
