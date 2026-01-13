@@ -264,7 +264,6 @@ export default function AuthScreen({ navigation }: Props) {
           </>
         )}
 
-
         <TouchableOpacity style={styles.kiteButton} onPress={() => {
             Keyboard.dismiss(); // ✅ CLOSE KEYBOARD
             isSignUp ? signUp() : signIn();

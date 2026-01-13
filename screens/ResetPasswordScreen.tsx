@@ -46,7 +46,7 @@ export default function ResetPasswordScreen() {
     setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://xtrackverification.vercel.app/reset-password",
+      redirectTo: "https://xtrackresetpassword.vercel.app/",
     });
 
     setLoading(false);

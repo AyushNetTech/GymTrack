@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Linking, ActivityIndicator, View, StatusBar, Platform } from 'react-native';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { ActivityIndicator, View, StatusBar, Platform } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { supabase } from './lib/supabase';
@@ -12,16 +12,9 @@ import TabNavigator from "./navigation/TabNavigator";
 import { ToastProvider } from "./components/ToastProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import IntroScreen from './screens/IntroScreen';
-import { checkProfileCompletion } from "./utils/profileState";
+import { checkProfileCompletion, clearProfileCompleted } from "./utils/profileState";
 import { navigationRef } from "./navigation/navigationRef";
 import { hasCompletedIntro } from "./utils/authState";
-
-import {
-  markAuthStarted,
-  hasAuthStarted,
-  shouldShowVerifyDialog,
-} from "./utils/authState";
-
 
 
 export type RootStackParamList = {
@@ -34,44 +27,18 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
-const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['myapp://'],
-  config: {
-    screens: {
-      ProfileSetup: 'profile-setup',
-    },
-  },
-};
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [handlingCallback, setHandlingCallback] = useState(false);
-  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
-const [openedFromVerification, setOpenedFromVerification] = useState(false);
-const [linkingReady, setLinkingReady] = useState(false);
 const [authStateReady, setAuthStateReady] = useState(false);
 const [profileChecked, setProfileChecked] = useState(false);
 const [profileCompleted, setProfileCompleted] = useState(false);
 const [introCompleted, setIntroCompleted] = useState(false);
 
-
-
 useEffect(() => {
   const restoreAuthState = async () => {
     const introDone = await hasCompletedIntro();
     setIntroCompleted(introDone);
-
-    const started = await hasAuthStarted();
-    const showDialog = await shouldShowVerifyDialog();
-
-    if (started) {
-      setOpenedFromVerification(true);
-    }
-
-    if (showDialog && !showVerifyDialog) {
-      setShowVerifyDialog(true);
-    }
 
     setAuthStateReady(true);
   };
@@ -94,135 +61,43 @@ useEffect(() => {
       
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      setLoading(false);
       
     };
     init();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       
       setSession(session);
       if (!session) {
         // 🔥 user signed out
         setProfileCompleted(false);
         setProfileChecked(false);
-        setOpenedFromVerification(false);
-        setShowVerifyDialog(false);
-        setHandlingCallback(false);
+        await clearProfileCompleted();
       }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
 
   // -----------------------
-  // Handle auth callback
-  // -----------------------
-  const handleAuthCallback = async (url: string) => {
-  setHandlingCallback(true); // 🔒 lock UI immediately
-
-  let access_token = null;
-  let refresh_token = null;
-
-  // Try HASH format (#access_token=...)
-  const hashIndex = url.indexOf("#");
-  if (hashIndex !== -1) {
-    const hashString = url.substring(hashIndex + 1);
-    const hashParams = new URLSearchParams(hashString);
-    access_token = hashParams.get("access_token");
-    refresh_token = hashParams.get("refresh_token");
-  }
-
-  // Try QUERY format (?access_token=...)
-  const queryIndex = url.indexOf("?");
-  if (queryIndex !== -1 && !access_token) {
-    const queryString = url.substring(queryIndex + 1);
-    const queryParams = new URLSearchParams(queryString);
-    access_token = queryParams.get("access_token");
-    refresh_token = queryParams.get("refresh_token");
-  }
-
-  if (!access_token || !refresh_token) {
-    setHandlingCallback(false);
-    return;
-  }
-
-  
-
-  const { error } = await supabase.auth.setSession({
-    access_token,
-    refresh_token,
-  });
-
-  if (error) {
-    Alert.alert("Session error", error.message);
-    setHandlingCallback(false);
-    return;
-  }
-
-  setHandlingCallback(false); // 🔓 unlock after navigation
-};
-
-
-  // -----------------------
-  // Deep link listener
-  // -----------------------
-  useEffect(() => {
-  const handleUrl = async ({ url }: { url: string }) => {
-
-      if (url.includes("auth/callback")) {
-        // Alert.alert("Verification Link Opened");
-
-        await markAuthStarted();
-          setOpenedFromVerification(true);
-
-          await handleAuthCallback(url);
-
-          // 🔥 ADD THIS
-          setShowVerifyDialog(true);
-        return;
-      }
-
-
-
-  };
-
-  // Cold start
-  Linking.getInitialURL().then((url) => {
-    if (url) {
-      handleUrl({ url });
-    }
-    setLinkingReady(true); // ✅ mark linking resolved
-  });
-
-
-  // Warm start
-  const sub = Linking.addEventListener("url", handleUrl);
-
-  return () => sub.remove();
-}, []);
-
-
-
-
-  // -----------------------
   // Check profile
   // -----------------------
   useEffect(() => {
-    const checkProfile = async () => {
-      if (!session?.user || handlingCallback) return;
+  if (!session?.user) {
+    setProfileChecked(false);
+    return;
+  }
 
-      const completed = await checkProfileCompletion(session.user.id);
+  const checkProfile = async () => {
+    const completed = await checkProfileCompletion(session.user.id);
+    setProfileCompleted(completed);
+    setProfileChecked(true);
+  };
 
-      setProfileCompleted(completed);
-      setProfileChecked(true);
-    };
-
-    checkProfile();
-  }, [session, handlingCallback]);
+  checkProfile();
+}, [session]);
 
 
-
-  if (!linkingReady || !authStateReady || (session && !profileChecked)) {
+  if (!authStateReady || (session && !profileChecked)) {
   return (
     <SafeAreaProvider>
       <PaperProvider>
@@ -242,40 +117,46 @@ useEffect(() => {
         <ToastProvider>
           <StatusBar barStyle="light-content" backgroundColor="black" />
           <NavigationContainer
-            linking={linking}
             ref={navigationRef}
           >
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-              <Stack.Navigator screenOptions={{ headerShown: false }}>
-                {!session && !introCompleted && !openedFromVerification && (
-                  <Stack.Screen name="Intro" component={IntroScreen} />
-                )}
+              {/* Intro */}
+              {!session && !introCompleted && (
+                <Stack.Screen name="Intro" component={IntroScreen} />
+              )}
 
-                {!session && <Stack.Screen name="Auth" component={AuthScreen} />}
-
-                <Stack.Screen
+              {/* Auth */}
+              {!session && (
+                <>
+                  <Stack.Screen name="Auth" component={AuthScreen} />
+                  <Stack.Screen
                     name="ResetPassword"
                     component={ResetPasswordScreen}
-                />
+                  />
+                </>
+              )}
 
-                {session && !profileCompleted && (
-                  <Stack.Screen name="ProfileSetup">
-                    {(props) => (
-                      <ProfileSetupScreen
-                        {...props}
-                        onProfileCompleted={() => {
-                          setProfileCompleted(true);
-                        }}
-                      />
-                    )}
-                  </Stack.Screen>
-                )}
+              {/* Profile setup */}
+              {session && !profileCompleted && (
+                <Stack.Screen name="ProfileSetup">
+                  {(props) => (
+                    <ProfileSetupScreen
+                      {...props}
+                      onProfileCompleted={() => {
+                        setProfileCompleted(true);
+                      }}
+                    />
+                  )}
+                </Stack.Screen>
+              )}
 
+              {/* Main app */}
+              {session && profileCompleted && (
+                <Stack.Screen name="Home" component={TabNavigator} />
+              )}
 
-                {session && profileCompleted && (
-                  <Stack.Screen name="Home" component={TabNavigator} />
-                )}
-              </Stack.Navigator>
+            </Stack.Navigator>
 
           </NavigationContainer>
         </ToastProvider>
