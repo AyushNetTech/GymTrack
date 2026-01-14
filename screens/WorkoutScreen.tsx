@@ -75,7 +75,7 @@ export default function WorkoutScreen() {
       <View
         style={{
           width: "100%",
-          height: 180,
+          height: 160,
           position: "absolute",
           top: 0,
           zIndex: 10,
@@ -104,7 +104,7 @@ export default function WorkoutScreen() {
           width: "100%",
           backgroundColor: "#111",
           position: "absolute",
-          top: 180,
+          top: 160,
           zIndex: 10,
           paddingVertical: 12,
         }}
@@ -149,7 +149,7 @@ export default function WorkoutScreen() {
         data={workouts}
         keyExtractor={(item) => item.id}
         numColumns={2}
-        style={{ flex: 1, marginTop: 180 + 60 }} // push list below header & categories
+        style={{ flex: 1, marginTop: 160 + 55 }} // push list below header & categories
         contentContainerStyle={{
           paddingHorizontal: 15,
           paddingBottom: 200,
@@ -176,7 +176,7 @@ export default function WorkoutScreen() {
               <Text style={{ color: "#fff", fontWeight: "700" }}>
                 {item.title}
               </Text>
-              <Text style={{ color: "#aaa", marginTop: 2 }}>
+              <Text style={{ color: "#ececec", marginTop: 2 }}>
                 {item.duration} Beginner
               </Text>
             </View>

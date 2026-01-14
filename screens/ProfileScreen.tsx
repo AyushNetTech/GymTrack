@@ -160,7 +160,7 @@ export default function ProfileScreen() {
             </Text>
 
             {/* GLASS STATS */}
-            <BlurView intensity={50} tint="dark" style={styles.statsCard}>
+            <BlurView intensity={0} tint="dark" style={styles.statsCard}>
               <Stat
                 label="Height"
                 value={profile?.height ? `${profile.height} cm` : "--"}
@@ -256,75 +256,72 @@ header: {
   overflow: "hidden",
 },
 
-
-
 headerOverlay: {
   flex: 1, // 🔥 makes overlay fill header height
   backgroundColor: "rgba(0,0,0,0.55)",
   alignItems: "center",
   justifyContent: "center",
   paddingTop: 10,
-  paddingBottom: 20,
+  paddingBottom: 6,
 },
-
 
   photoContainer: { position: "relative", marginBottom: 5 },
 avatar: {
   marginTop:50,
-  width: 110,
-  height: 110,
-  borderRadius: 55,
+  width: 100,
+  height: 100,
+  borderRadius: 50,
 },
 
   editIcon: {
     position: "absolute",
-    bottom: 6,
-    right: 6,
+    bottom: 4,
+    right: 4,
     backgroundColor: "#f4ff47",
-    width: 32,
-    height: 32,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  name: { fontSize: 22, color: "white", fontWeight: "700"},
-  subtitle: { color: "#f4ff47", marginTop: 3, fontWeight:"bold", fontSize:16 },
+  name: { fontSize: 20, color: "white", fontWeight: "700"},
+  subtitle: { color: "#f4ff47", marginTop: 1, fontWeight:"bold", fontSize:15 },
 
   statsCard: {
     flexDirection: "row",
-    marginTop: 10,
+    marginTop: 7,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    borderRadius: 18,
+    borderRadius: 28,
     width: "92%",
     justifyContent: "space-around",
     borderWidth: 2,
     borderColor:"rgba(110, 110, 110, 0.9)",
-    backgroundColor: "rgba(51, 51, 51, 0.9)",
+    backgroundColor: "rgba(59, 59, 59, 0.8)",
   },
 
   statItem: { alignItems: "center", borderRadius:18 },
   statValue: { color: "white", fontWeight: "700", borderRadius:18 },
-  statLabel: { color: "#bbb", fontSize: 14, borderRadius:18 },
+  statLabel: { color: "#cccccc", fontSize: 12, borderRadius:18 },
 
-  section: { marginTop: 20, paddingHorizontal: 20 },
-  sectionTitle: { color: "#b4b4b4ff", marginBottom: 10 },
+  section: { marginTop: 14, paddingHorizontal: 20 },
+  sectionTitle: { color: "#b4b4b4ff", marginBottom: 5 },
 
   itemRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#1f1f22",
+    borderBottomColor: "#2c2c2c",
   },
 
   itemText: { color: "white", marginLeft: 14 },
 
   signOut: {
     marginTop: 10,
-    marginHorizontal: 20,
+    marginHorizontal: 40,
     backgroundColor: "#ff5328ff",
     color:"#fff",
     fontWeight:"bold",
@@ -336,10 +333,10 @@ avatar: {
 
   uploadOverlay: {
     position: "absolute",
-    top: 100,
+    top: 90,
     alignSelf: "center",
     flexDirection: "row",
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.44)",
     padding: 10,
     borderRadius: 20,
     zIndex: 999,
