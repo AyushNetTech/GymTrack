@@ -151,7 +151,7 @@ export default function AuthScreen({ navigation }: Props) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: 'https://xtrackverification.vercel.app/' },
+      options: { emailRedirectTo: 'https://workout-auth-web.vercel.app/verification.html' },
     });
 
     setLoading(false);
