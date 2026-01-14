@@ -39,10 +39,22 @@ const TabIcon = ({ name, focused }: TabIconProps) => {
   )
 }
 
-export default function TabNavigator() {
+type Props = {
+  onHomeReady?: () => void;
+};
+
+export default function TabNavigator({ onHomeReady }: Props) {
+
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }} tabBar={(props) => <CurvedTabBar {...props} />}>
-      <Tab.Screen name="HomeTab" component={HomeScreen} />
+      <Tab.Screen name="HomeTab">
+        {(props) => (
+          <HomeScreen
+            {...props}
+            onReady={onHomeReady}
+          />
+        )}
+      </Tab.Screen>
       <Tab.Screen name="Workout" component={WorkoutScreen} />
       {/* Replace AddWorkout with the stack navigator */}
       <Tab.Screen name="AddWorkout" component={WorkoutStackNavigator} />

@@ -3,15 +3,17 @@ import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
-import LoadingScreen from "../components/LoadingScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 
-export default function HomeScreen() {
+export default function HomeScreen({
+  onReady,
+}: {
+  onReady?: () => void;
+}) {
   const [weekDates, setWeekDates] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
 
   const defaultAvatar = require("../assets/blankprofile.png"); // fallback
@@ -34,47 +36,24 @@ export default function HomeScreen() {
   }, []);
 
   async function loadProfile() {
-  setLoading(true);
-
-  const delay = new Promise((resolve) => setTimeout(resolve, 2000));
-
   try {
     const { data } = await supabase.auth.getUser();
     const user = data.user;
     if (!user) return;
 
-    const profilePromise = supabase
+    const { data: profileData } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
 
-    // Wait for BOTH the profile fetch and the delay
-    const [profileResult] = await Promise.all([profilePromise, delay]);
-
-    const { data: profileData, error } = profileResult;
-
-    if (error || !profileData) {
-      console.log("Profile error:", error);
-      setProfile(null);
-    } else {
-      setProfile({
-        ...profileData,
-        avatar_url:
-          profileData.avatar_url && profileData.avatar_url.trim() !== ""
-            ? profileData.avatar_url
-            : null,
-      });
-    }
+    setProfile(profileData ?? null);
   } catch (e) {
-    console.log("Unexpected error loading profile:", e);
-    setProfile(null);
+    console.log(e);
   } finally {
-    setLoading(false); // now will properly hide the LoadingScreen
+    onReady?.(); // ✅ THIS is the magic
   }
 }
-
-
 
   const generateWeek = () => {
     const today = new Date();
@@ -233,7 +212,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-      <LoadingScreen visible={loading} />
     </View>
   </SafeAreaView>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, StatusBar, Platform } from 'react-native';
+import { StatusBar, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -15,7 +15,7 @@ import IntroScreen from './screens/IntroScreen';
 import { checkProfileCompletion, clearProfileCompleted } from "./utils/profileState";
 import { navigationRef } from "./navigation/navigationRef";
 import { hasCompletedIntro } from "./utils/authState";
-
+import LoadingScreen from "./components/LoadingScreen";
 
 export type RootStackParamList = {
   Intro: undefined;
@@ -34,6 +34,17 @@ const [authStateReady, setAuthStateReady] = useState(false);
 const [profileChecked, setProfileChecked] = useState(false);
 const [profileCompleted, setProfileCompleted] = useState(false);
 const [introCompleted, setIntroCompleted] = useState(false);
+const [initialAppLoad, setInitialAppLoad] = useState(true);
+const [homeReady, setHomeReady] = useState(false);
+const appLoading =
+  !authStateReady ||
+  (session && !profileChecked) ||
+  (session && profileCompleted && !homeReady);
+
+  useEffect(() => {
+  setHomeReady(false);
+}, [session]);
+
 
 useEffect(() => {
   const restoreAuthState = async () => {
@@ -80,36 +91,23 @@ useEffect(() => {
 
   // -----------------------
   // Check profile
-  // -----------------------
+
   useEffect(() => {
-  if (!session?.user) {
-    setProfileChecked(false);
-    return;
-  }
+    if (!session?.user) {
+      setProfileChecked(false);
+      setInitialAppLoad(false);
+      return;
+    }
 
-  const checkProfile = async () => {
-    const completed = await checkProfileCompletion(session.user.id);
-    setProfileCompleted(completed);
-    setProfileChecked(true);
-  };
+    const checkProfile = async () => {
+      const completed = await checkProfileCompletion(session.user.id);
+      setProfileCompleted(completed);
+      setProfileChecked(true);
+      setInitialAppLoad(false); // ✅ KEY
+    };
 
-  checkProfile();
-}, [session]);
-
-
-  if (!authStateReady || (session && !profileChecked)) {
-  return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <ToastProvider>
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#111" }}>
-            <ActivityIndicator size="large" color="#f4ff47" />
-          </View>
-        </ToastProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
-  );
-}
+    checkProfile();
+  }, [session]);
 
   return (
     <SafeAreaProvider>
@@ -153,12 +151,19 @@ useEffect(() => {
 
               {/* Main app */}
               {session && profileCompleted && (
-                <Stack.Screen name="Home" component={TabNavigator} />
+                <Stack.Screen name="Home">
+                  {(props) => (
+                    <TabNavigator
+                      {...props}
+                      onHomeReady={() => setHomeReady(true)}
+                    />
+                  )}
+                </Stack.Screen>
               )}
-
             </Stack.Navigator>
 
           </NavigationContainer>
+          <LoadingScreen visible={appLoading} />
         </ToastProvider>
       </PaperProvider>
     </SafeAreaProvider>
