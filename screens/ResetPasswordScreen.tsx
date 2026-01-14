@@ -9,15 +9,20 @@ import {
   Image,
   Keyboard,
   Platform,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { supabase } from "../lib/supabase";
+import EmailActionDialog from "../components/EmailActionDialog";
 
 export default function ResetPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailDialogMessage, setEmailDialogMessage] = useState("");
 
   const validateEmail = (value: string) => {
     setEmail(value);
@@ -46,7 +51,7 @@ export default function ResetPasswordScreen() {
     setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://workout-auth-web.vercel.app/resetpassword.html',
+      redirectTo: "https://workout-auth-web.vercel.app/resetpassword.html",
     });
 
     setLoading(false);
@@ -56,7 +61,10 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    alert("Password reset link sent. Please check your email.");
+    setEmailDialogMessage(
+      "Password reset link sent.\nPlease check your email."
+    );
+    setShowEmailDialog(true);
     setEmail("");
   };
 
@@ -71,38 +79,63 @@ export default function ResetPasswordScreen() {
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar style="light" translucent backgroundColor="transparent" />
 
-        <View style={styles.container}>
-          <View style={styles.card}>
-            <Text style={styles.title}>Reset Password</Text>
-            <Text style={styles.subtitle}>
-              Enter your email to receive a password reset link.
-            </Text>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+        >
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
+              paddingBottom: Platform.OS === "android" ? 120 : 40,
+            }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.container}>
+              <View style={styles.card}>
+                <Text style={styles.title}>Reset Password</Text>
+                <Text style={styles.subtitle}>
+                  Enter your email to receive a password reset link.
+                </Text>
 
-            <TextInput
-              style={[styles.input, error && styles.inputError]}
-              placeholder="Email"
-              placeholderTextColor="#aaa"
-              value={email}
-              onChangeText={validateEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+                <TextInput
+                  style={[styles.input, error && styles.inputError]}
+                  placeholder="Email"
+                  placeholderTextColor="#aaa"
+                  value={email}
+                  onChangeText={validateEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                {error ? (
+                  <Text style={styles.errorText}>{error}</Text>
+                ) : null}
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleReset}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#000" />
-              ) : (
-                <Text style={styles.buttonText}>Send Reset Link</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleReset}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#000" />
+                  ) : (
+                    <Text style={styles.buttonText}>Send Reset Link</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        <EmailActionDialog
+          visible={showEmailDialog}
+          duration={10}
+          message={emailDialogMessage}
+          onTimeout={() => setShowEmailDialog(false)}
+        />
       </SafeAreaView>
     </View>
   );
