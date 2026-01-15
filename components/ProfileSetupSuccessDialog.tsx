@@ -38,7 +38,7 @@ export default function ProfileSetupSuccessDialog({
         duration: 200,
         useNativeDriver: true,
       }).start(() => onAutoClose());
-    }, 2500);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [visible]);

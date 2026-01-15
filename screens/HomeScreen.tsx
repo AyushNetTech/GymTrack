@@ -5,8 +5,6 @@ import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
-
 export default function HomeScreen({
   onReady,
 }: {
