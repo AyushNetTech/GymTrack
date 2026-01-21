@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     height: TAB_HEIGHT,
   },
   button: {
-    width: 51,
+    width: 53,
     height: TAB_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
