@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { Ionicons } from "@expo/vector-icons"
 
 import HomeScreen from "../screens/HomeScreen"
-import WorkoutScreen from "../screens/WorkoutScreen"
+import WorkoutBrowseStackNavigator from "./WorkoutBrowseStackNavigator";
 import AnalysisScreen from "../screens/AnalysisScreen"
 import ProfileScreen from "../screens/ProfileScreen"
 import WorkoutStackNavigator from "./WorkoutStackNavigator"
@@ -55,7 +55,10 @@ export default function TabNavigator({ onHomeReady }: Props) {
           />
         )}
       </Tab.Screen>
-      <Tab.Screen name="Workout" component={WorkoutScreen} />
+      <Tab.Screen
+        name="Workout"
+        component={WorkoutBrowseStackNavigator}
+      />
       {/* Replace AddWorkout with the stack navigator */}
       <Tab.Screen name="AddWorkout" component={WorkoutStackNavigator} />
       <Tab.Screen name="Analysis" component={AnalysisScreen} />

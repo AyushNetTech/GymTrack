@@ -1,188 +1,252 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   Image,
-  Dimensions,
   TouchableOpacity,
   FlatList,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LoadingScreen from "../components/LoadingScreen"; // your existing loader
+import { supabase } from "../lib/supabase";
+import LoadingScreen from "../components/LoadingScreen";
+import { useNavigation } from "@react-navigation/native";
+import WorkoutHeader, { HEADER_HEIGHT } from "../components/WorkoutHeader";
 
-const { width } = Dimensions.get("window");
-
-const categories = ["Full Body", "Cardio", "Chest", "Stretching", "Strength"];
-
-const getFormattedDate = () => {
-  const today = new Date();
-
-  const days = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const dayName = days[today.getDay()];
-  const date = today.getDate();
-  const month = months[today.getMonth()];
-
-  return `${dayName}, ${date} ${month}`;
-};
-
-
-const workouts = [
-  { id: "1", title: "10-Min HIIT Cardio", duration: "22 min", img: "https://picsum.photos/400/600?1" },
-  { id: "2", title: "Cycling Sprint Routine", duration: "20 min", img: "https://picsum.photos/400/600?2" },
-  { id: "3", title: "Bodyweight Burn", duration: "18 min", img: "https://picsum.photos/400/600?3" },
-  { id: "4", title: "Yoga Flex Flow", duration: "25 min", img: "https://picsum.photos/400/600?4" },
+const DIFFICULTIES = [
+  {
+    Title: "beginner",
+    Image:
+      "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/WorkoutLevelHeader/abs/beginner.jpg",
+  },
+  {
+    Title: "intermediate",
+    Image:
+      "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/WorkoutLevelHeader/abs/intermediate.jpg",
+  },
+  {
+    Title: "advanced",
+    Image:
+      "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/WorkoutLevelHeader/abs/advanced.jpg",
+  },
+  {
+    Title: "stretching",
+    Image:
+      "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/WorkoutLevelHeader/abs/beginner.jpg",
+  },
 ];
 
 export default function WorkoutScreen() {
-  const [selectedCategory, setSelectedCategory] = useState("Full Body");
-  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation<any>();
+  const userGender = "men";
 
-  // Simulate loading for demonstration
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [exerciseLoading, setExerciseLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [exercises, setExercises] = useState<any[]>([]);
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500); // simulate 1.5s loading
-    return () => clearTimeout(timer);
+    async function loadCategories() {
+      const { data } = await supabase
+        .from("exercises")
+        .select("muscle_group")
+        .eq("gender", userGender)
+        .eq("status", "active");
+
+      const unique = [...new Set(data?.map(i => i.muscle_group))];
+      setCategories(unique);
+      setSelectedCategory(unique[0] || null);
+      setInitialLoading(false);
+    }
+
+    loadCategories();
   }, []);
 
-  if (loading) return <LoadingScreen visible={true} />; // full-screen loader
+  useEffect(() => {
+    if (!selectedCategory || !selectedDifficulty) return;
+
+    async function loadExercises() {
+      setExerciseLoading(true);
+
+      const { data } = await supabase
+        .from("exercises")
+        .select("id, exercise_name, equipment")
+        .eq("gender", userGender)
+        .eq("muscle_group", selectedCategory)
+        .eq("difficulty", selectedDifficulty)
+        .eq("status", "active")
+        .order("exercise_name");
+
+      setExercises(data || []);
+      setExerciseLoading(false);
+    }
+
+    loadExercises();
+  }, [selectedCategory, selectedDifficulty]);
+
+  if (initialLoading) return <LoadingScreen visible />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#111" }} edges={[]}>
-      {/* ---------- HEADER IMAGE ---------- */}
-      <View
-        style={{
-          width: "100%",
-          height: 160,
-          position: "absolute",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <Image
-          source={{
-            uri: "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/HeaderWorkoutScreen.jpg",
-          }}
-          style={{ width: "100%", height: "100%", opacity: 0.7 }}
-        />
-        <View style={{ position: "absolute", bottom: 10, right: 20 }}>
-          <Text style={{ color: "#fff", fontSize: 14, opacity: 0.8 }}>
-            {getFormattedDate()}
-          </Text>
-
-          <Text style={{ color: "#fff", fontSize: 32, fontWeight: "700" }}>
-            Workouts
-          </Text>
-        </View>
-      </View>
-
-      {/* ---------- HORIZONTAL CATEGORY BAR ---------- */}
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#111",
-          position: "absolute",
-          top: 160,
-          zIndex: 10,
-          paddingVertical: 12,
-        }}
-      >
-        <FlatList
-          data={categories}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 15 }}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => {
-            const active = selectedCategory === item;
-            return (
-              <TouchableOpacity onPress={() => setSelectedCategory(item)}>
-                <View
-                  style={{
-                    paddingHorizontal: 18,
-                    paddingVertical: 10,
-                    borderRadius: 20,
-                    backgroundColor: active ? "#f4ff47" : "#1c1c1e",
-                    marginRight: 10,
+      {/* CATEGORY SCROLL */}
+      {!selectedDifficulty && (
+        <View style={{ height: 70 }}>
+          <FlatList
+            data={categories}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 15,
+              alignItems: "center",
+            }}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => {
+              const active = selectedCategory === item;
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedCategory(item);
+                    setSelectedDifficulty(null);
                   }}
+                  style={{ marginRight: 12 }}
                 >
-                  <Text
+                  <View
                     style={{
-                      color: active ? "#000" : "#fff",
-                      fontSize: 14,
-                      fontWeight: active ? "700" : "400",
+                      paddingHorizontal: 18,
+                      paddingVertical: 8,
+                      borderRadius: 15,
+                      backgroundColor: active ? "#f4ff47" : "#1c1c1e",
                     }}
                   >
+                    <Text
+                      style={{
+                        color: active ? "#000" : "#fff",
+                        fontWeight: "bold",
+                        fontSize:15,
+                        // textTransform: "capitalize",
+                      }}
+                    >
                     {item}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </View>
-
-      {/* ---------- SCROLLING WORKOUT GRID ---------- */}
-      <FlatList
-        data={workouts}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        style={{ flex: 1, marginTop: 160 + 55 }} // push list below header & categories
-        contentContainerStyle={{
-          paddingHorizontal: 15,
-          paddingBottom: 200,
-          paddingTop: 10,
-        }}
-        columnWrapperStyle={{
-          justifyContent: "space-between",
-          marginBottom: 20,
-        }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{
-              width: (width - 45) / 2,
-              backgroundColor: "#111",
-              borderRadius: 16,
-              overflow: "hidden",
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
             }}
-          >
-            <Image
-              source={{ uri: item.img }}
-              style={{ width: "100%", height: 100 }}
-            />
-            <View style={{ padding: 10 }}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>
-                {item.title}
-              </Text>
-              <Text style={{ color: "#ececec", marginTop: 2 }}>
-                {item.duration} Beginner
-              </Text>
-            </View>
+          />
+        </View>
+      )}
+
+      {/* TITLE + BACK */}
+      {selectedDifficulty && (
+        <View style={{ paddingHorizontal: 15, paddingBottom: 10, paddingTop:16}}>
+          <TouchableOpacity onPress={() => setSelectedDifficulty(null)}>
+            <Text style={{ color: "#f4ff47", fontSize: 16 }}>← Back</Text>
           </TouchableOpacity>
-        )}
-      />
+          <Text style={{ color: "#fff", fontSize: 22, fontWeight: "700", marginTop: 6 }}>
+            {selectedCategory} • {selectedDifficulty}
+          </Text>
+        </View>
+      )}
+
+      {/* CONTENT */}
+      {!selectedDifficulty ? (
+        <FlatList
+          data={DIFFICULTIES}
+          keyExtractor={(item) => item.Title}
+          contentContainerStyle={{
+            paddingHorizontal: 15,
+            paddingBottom: 150,
+          }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setSelectedDifficulty(item.Title)}
+              style={{
+                height: 120,
+                borderRadius: 18,
+                marginBottom: 18,
+                overflow: "hidden",
+                backgroundColor: "#202020",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Image
+                source={{ uri: item.Image }}
+                style={StyleSheet.absoluteFillObject}
+              />
+
+              <View
+                style={{
+                  height:"100%",
+                  width:"auto",
+                  padding: 20,
+                  display:"flex",
+                  justifyContent:"flex-end",
+                  alignItems:"flex-start",
+                  backgroundColor: "rgba(0,0,0,0.35)",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 22,
+                    fontWeight: "800",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {item.Title}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      ) : (
+        <FlatList
+          data={exercises}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("ExerciseDetail", { exerciseId: item.id })
+              }
+              style={{
+                flexDirection: "row",
+                backgroundColor: "#1c1c1e",
+                borderRadius: 16,
+                marginBottom: 14,
+                overflow: "hidden",
+              }}
+            >
+              <View
+                style={{
+                  width: 110,
+                  height: 90,
+                  backgroundColor: "#000",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#f4ff47", fontSize: 22 }}>▶</Text>
+              </View>
+
+              <View style={{ flex: 1, padding: 12, justifyContent: "center" }}>
+                <Text
+                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
+                  numberOfLines={2}
+                >
+                  {item.exercise_name}
+                </Text>
+
+                <Text style={{ color: "#aaa", marginTop: 4, fontSize: 13 }}>
+                  {item.equipment || "No equipment"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
