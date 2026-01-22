@@ -1,9 +1,46 @@
 import React from "react";
-import { View, Image } from "react-native";
+import { View, Image, Text } from "react-native";
 
-const HEADER_HEIGHT = 160;
+export const HEADER_HEIGHT = 160;
 
-export default function WorkoutHeader() {
+const getFormattedDate = () => {
+  const today = new Date();
+
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  return `${days[today.getDay()]}, ${today.getDate()} ${
+    months[today.getMonth()]
+  }`;
+};
+
+type Props = {
+  title?: string;
+};
+
+export default function WorkoutHeader({ title = "Workouts" }: Props) {
   return (
     <View style={{ height: HEADER_HEIGHT }}>
       <Image
@@ -16,8 +53,31 @@ export default function WorkoutHeader() {
           opacity: 0.7,
         }}
       />
+
+      {/* 🔥 TEXT OVERLAY */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 12,
+          right: 20,
+          alignItems: "flex-end",
+        }}
+      >
+        <Text style={{ color: "#e4e3e3", fontSize: 14, fontWeight: "500", }}>
+          {getFormattedDate()}
+        </Text>
+
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 32,
+            fontWeight: "700",
+            marginTop: 2,
+          }}
+        >
+          {title}
+        </Text>
+      </View>
     </View>
   );
 }
-
-export { HEADER_HEIGHT };
