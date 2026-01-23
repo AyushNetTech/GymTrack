@@ -78,7 +78,7 @@ export default function ExerciseDetailScreen() {
       {/* TITLE */}
       <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: "#f4ff47", fontSize: 16 }}>← Back</Text>
+          <Text style={{ color: "#f4ff47", fontSize: 16, fontWeight:900 }}>← Back</Text>
         </TouchableOpacity>
 
         <Text style={{ color: "#aaa", marginTop: 6 }}>
@@ -91,16 +91,16 @@ export default function ExerciseDetailScreen() {
       </View>
 
       {/* CONTENT */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 16 }}>
         {/* VIDEO */}
         <View
           style={{
             marginTop: 14,
-            height: 220,
+            height: 200,
             borderRadius: 16,
             overflow: "hidden",
-            backgroundColor: "#0d0d0d",
-            borderWidth: 1,
+            backgroundColor: "#fff",
+            borderWidth: 2,
             borderColor: "#222",
           }}
         >
@@ -112,7 +112,7 @@ export default function ExerciseDetailScreen() {
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#666", fontSize: 12, letterSpacing: 1 }}>
+              <Text style={{ color: "#000000", fontSize: 12, letterSpacing: 1 }}>
                 LOADING VIDEO
               </Text>
             </View>
@@ -121,7 +121,7 @@ export default function ExerciseDetailScreen() {
           <VideoView
             style={{ width: "100%", height: "100%" }}
             player={player}
-            fullscreenOptions={{ enable: true }}
+            fullscreenOptions={{ enable: false }}
           />
         </View>
 

@@ -186,7 +186,7 @@ export default function WorkoutScreen() {
       {selectedDifficulty && (
         <View style={{ paddingHorizontal: 15, paddingBottom: 10, paddingTop:16}}>
           <TouchableOpacity onPress={() => setSelectedDifficulty(null)}>
-            <Text style={{ color: "#f4ff47", fontSize: 16 }}>← Back</Text>
+            <Text style={{ color: "#f4ff47", fontSize: 16, fontWeight:900 }}>← Back</Text>
           </TouchableOpacity>
           <Text style={{ color: "#fff", fontSize: 22, fontWeight: "700", marginTop: 6 }}>
             {selectedCategory} • {selectedDifficulty}
@@ -207,8 +207,10 @@ export default function WorkoutScreen() {
             <TouchableOpacity
               onPress={() => setSelectedDifficulty(item.Title)}
               style={{
-                height: 120,
+                height: 140,
                 borderRadius: 18,
+                borderWidth:4,
+                borderColor:"black",
                 marginBottom: 18,
                 overflow: "hidden",
                 backgroundColor: "#202020",
@@ -260,7 +262,7 @@ export default function WorkoutScreen() {
               <FlatList
                 data={exercises}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
+                contentContainerStyle={{ padding: 15, paddingBottom: 150 }}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     onPress={() =>
@@ -276,8 +278,8 @@ export default function WorkoutScreen() {
                   >
                     <View
                       style={{
-                        width: 110,
-                        height: 90,
+                        width: 150,
+                        height: 110,
                         backgroundColor: "#000",
                         justifyContent: "center",
                         alignItems: "center",

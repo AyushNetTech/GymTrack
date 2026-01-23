@@ -61,7 +61,7 @@ export default function WorkoutHeader({ title = "Workouts" }: Props) {
           alignItems: "flex-end",
         }}
       >
-        <Text style={{ color: "#e4e3e3", fontSize: 14, fontWeight: "500", }}>
+        <Text style={{ color: "#f0f0f0", fontSize: 14, fontWeight: "600", }}>
           {getFormattedDate()}
         </Text>
 
@@ -69,7 +69,7 @@ export default function WorkoutHeader({ title = "Workouts" }: Props) {
           style={{
             color: "#fff",
             fontSize: 32,
-            fontWeight: "700",
+            fontWeight: "800",
             marginTop: 2,
           }}
         >
