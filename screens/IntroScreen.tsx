@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { BlurView } from "expo-blur";
+import { markIntroCompleted } from "../utils/authState";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,7 +34,7 @@ const slides = [
   },
 ];
 
-export default function IntroScreen({ navigation }: any) {
+export default function IntroScreen({ onIntroCompleted }: any) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList<any>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -42,11 +43,12 @@ export default function IntroScreen({ navigation }: any) {
     setCurrentIndex(Math.round(e.nativeEvent.contentOffset.x / width));
   };
 
-  const goToNext = () => {
+  const goToNext = async () => {
     if (currentIndex < slides.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      navigation.replace("Auth");
+      await markIntroCompleted();
+      onIntroCompleted();
     }
   };
 

@@ -16,6 +16,8 @@ import { checkProfileCompletion, clearProfileCompleted } from "./utils/profileSt
 import { navigationRef } from "./navigation/navigationRef";
 import { hasCompletedIntro } from "./utils/authState";
 import LoadingScreen from "./components/LoadingScreen";
+import { UserProvider } from "./context/UserContext";
+
 
 export type RootStackParamList = {
   Intro: undefined;
@@ -36,10 +38,11 @@ const [profileCompleted, setProfileCompleted] = useState(false);
 const [introCompleted, setIntroCompleted] = useState(false);
 const [initialAppLoad, setInitialAppLoad] = useState(true);
 const [homeReady, setHomeReady] = useState(false);
-const appLoading =
-  !authStateReady ||
-  (session && !profileChecked) ||
-  (session && profileCompleted && !homeReady);
+const appReady =
+  authStateReady &&
+  initialAppLoad === false &&
+  (!session || profileChecked);
+
 
   useEffect(() => {
   setHomeReady(false);
@@ -110,10 +113,14 @@ useEffect(() => {
   }, [session]);
 
   return (
+    <UserProvider>
     <SafeAreaProvider>
       <PaperProvider>
         <ToastProvider>
           <StatusBar barStyle="light-content" backgroundColor="black" />
+          {!appReady ? (
+            <LoadingScreen visible />
+          ) : (
           <NavigationContainer
             ref={navigationRef}
           >
@@ -121,33 +128,37 @@ useEffect(() => {
 
               {/* Intro */}
               {!session && !introCompleted && (
-                <Stack.Screen name="Intro" component={IntroScreen} />
-              )}
-
-              {/* Auth */}
-              {!session && (
-                <>
-                  <Stack.Screen name="Auth" component={AuthScreen} />
-                  <Stack.Screen
-                    name="ResetPassword"
-                    component={ResetPasswordScreen}
-                  />
-                </>
-              )}
-
-              {/* Profile setup */}
-              {session && !profileCompleted && (
-                <Stack.Screen name="ProfileSetup">
+                <Stack.Screen name="Intro">
                   {(props) => (
-                    <ProfileSetupScreen
+                    <IntroScreen
                       {...props}
-                      onProfileCompleted={() => {
-                        setProfileCompleted(true);
-                      }}
+                      onIntroCompleted={() => setIntroCompleted(true)}
                     />
                   )}
                 </Stack.Screen>
               )}
+
+              {/* Auth */}
+              {!session && introCompleted && (
+                <>
+                  <Stack.Screen name="Auth" component={AuthScreen} />
+                  <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+                </>
+              )}
+
+              {/* Profile setup */}
+                {session && profileChecked && !profileCompleted && (
+                  <Stack.Screen name="ProfileSetup">
+                    {(props) => (
+                      <ProfileSetupScreen
+                        {...props}
+                        onProfileCompleted={() => {
+                          setProfileCompleted(true);
+                        }}
+                      />
+                    )}
+                  </Stack.Screen>
+                )}
 
               {/* Main app */}
               {session && profileCompleted && (
@@ -163,9 +174,10 @@ useEffect(() => {
             </Stack.Navigator>
 
           </NavigationContainer>
-          <LoadingScreen visible={appLoading} />
+          )}
         </ToastProvider>
       </PaperProvider>
     </SafeAreaProvider>
+    </UserProvider>
   );
 }

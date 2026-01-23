@@ -4,12 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useUser } from "../context/UserContext";
+
 
 export default function HomeScreen({
   onReady,
 }: {
   onReady?: () => void;
 }) {
+  const { setGender } = useUser();
   const [weekDates, setWeekDates] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
 
@@ -46,6 +49,9 @@ export default function HomeScreen({
       .single();
 
     setProfile(profileData ?? null);
+    if (profileData?.gender) {
+      setGender(profileData.gender); // "men" or "women"
+    }
   } catch (e) {
     console.log(e);
   } finally {

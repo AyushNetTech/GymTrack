@@ -40,12 +40,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "9f314cc1-68c6-4402-a7df-36042e8b7762"
+        "projectId": "319b78ec-c208-42df-abae-ee63194a0953"
       }
     },
-    "owner": "ayushupase369.2",
     "plugins": [
       "expo-video"
-    ]
+    ],
+    "owner": "ayushupase369"
   }
 }

@@ -12,6 +12,7 @@ import { supabase } from "../lib/supabase";
 import LoadingScreen from "../components/LoadingScreen";
 import { useNavigation } from "@react-navigation/native";
 import WorkoutHeader, { HEADER_HEIGHT } from "../components/WorkoutHeader";
+import { useUser } from "../context/UserContext";
 
 const DIFFICULTIES = [
   {
@@ -38,7 +39,7 @@ const DIFFICULTIES = [
 
 export default function WorkoutScreen() {
   const navigation = useNavigation<any>();
-  const userGender = "men";
+  const { gender } = useUser();
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [exerciseLoading, setExerciseLoading] = useState(false);
@@ -46,23 +47,57 @@ export default function WorkoutScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [exercises, setExercises] = useState<any[]>([]);
+  
+  const mapGenderToDB = (gender?: string) => {
+  if (!gender) return null;
+
+  const g = gender.toLowerCase();
+
+  if (g === "female" || g === "women") return "women";
+  if (g === "male" || g === "men") return "men";
+
+  return null;
+};
+
+const dbGender = mapGenderToDB(gender);
+
 
   useEffect(() => {
-    async function loadCategories() {
-      const { data } = await supabase
-        .from("exercises")
-        .select("muscle_group")
-        .eq("gender", userGender)
-        .eq("status", "active");
+  setInitialLoading(true);
+  setSelectedCategory(null);
+  setSelectedDifficulty(null);
+  setExercises([]);
 
-      const unique = [...new Set(data?.map(i => i.muscle_group))];
-      setCategories(unique);
-      setSelectedCategory(unique[0] || null);
-      setInitialLoading(false);
-    }
+  async function reload() {
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("muscle_group")
+    .eq("gender", dbGender)
+    .eq("status", "active");
 
-    loadCategories();
-  }, []);
+  console.log("APP GENDER:", gender);
+console.log("DB GENDER:", dbGender);
+
+  const unique = [
+    ...new Set(
+      data
+        ?.map(i => i.muscle_group?.trim())
+        .filter(Boolean)
+    ),
+  ];
+
+  console.log("CATEGORIES:", unique);
+
+  setCategories(unique);
+  setSelectedCategory(unique[0] || null);
+  setInitialLoading(false);
+}
+
+
+
+  console.log("CATEGORIES:", gender);
+  reload();
+}, [gender]);
 
   useEffect(() => {
     if (!selectedCategory || !selectedDifficulty) return;
@@ -73,7 +108,7 @@ export default function WorkoutScreen() {
       const { data } = await supabase
         .from("exercises")
         .select("id, exercise_name, equipment")
-        .eq("gender", userGender)
+        .eq("gender", gender)
         .eq("muscle_group", selectedCategory)
         .eq("difficulty", selectedDifficulty)
         .eq("status", "active")
@@ -84,7 +119,7 @@ export default function WorkoutScreen() {
     }
 
     loadExercises();
-  }, [selectedCategory, selectedDifficulty]);
+  }, [selectedCategory, selectedDifficulty, gender]);
 
   if (initialLoading) return <LoadingScreen visible />;
 
