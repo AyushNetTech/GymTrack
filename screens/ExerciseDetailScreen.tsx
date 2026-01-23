@@ -28,6 +28,7 @@ export default function ExerciseDetailScreen() {
 
   // ✅ Player init (mute, loop, autoplay)
   const player = useVideoPlayer(null, (player) => {
+    player.volume = 0;
     player.loop = true;
     player.muted = true;
     player.play();
@@ -93,38 +94,39 @@ export default function ExerciseDetailScreen() {
       {/* CONTENT */}
       <ScrollView contentContainerStyle={{ paddingBottom: 150, paddingHorizontal: 16 }}>
         {/* VIDEO */}
-        <View
-          style={{
-            marginTop: 14,
-            height: 200,
-            borderRadius: 16,
-            overflow: "hidden",
-            backgroundColor: "#fff",
-            borderWidth: 2,
-            borderColor: "#222",
-          }}
-        >
-          {!videoReady && (
-            <View
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "#000000", fontSize: 12, letterSpacing: 1 }}>
-                LOADING VIDEO
-              </Text>
-            </View>
-          )}
+          <View
+            style={{
+              marginTop: 14,
+              height: 200,
+              borderRadius: 16,
+              overflow: "hidden",
+              backgroundColor: "#fff",
+              borderWidth: 2,
+              borderColor: "#222",
+            }}
+            pointerEvents="none" // 🔒 disables ALL touch interaction
+          >
+            {!videoReady && (
+              <View
+                style={{
+                  ...StyleSheet.absoluteFillObject,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#000", fontSize: 12, letterSpacing: 1 }}>
+                  LOADING VIDEO
+                </Text>
+              </View>
+            )}
 
-          <VideoView
-            style={{ width: "100%", height: "100%" }}
-            player={player}
-            fullscreenOptions={{ enable: false }}
-          />
-        </View>
-
+            <VideoView
+              style={{ width: "100%", height: "100%" }}
+              player={player}
+              nativeControls={false}
+              fullscreenOptions={{ enable: false }}
+            />
+          </View>
         {/* EQUIPMENT */}
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600", marginTop: 22 }}>
           Equipment
