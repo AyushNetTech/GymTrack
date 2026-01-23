@@ -44,9 +44,7 @@ export default function WorkoutHeader({ title = "Workouts" }: Props) {
   return (
     <View style={{ height: HEADER_HEIGHT }}>
       <Image
-        source={{
-          uri: "https://mftvgiceccapzcgheaom.supabase.co/storage/v1/object/public/Workout%20Images/HeaderWorkoutScreen.jpg",
-        }}
+        source={require("../assets/HeaderWorkoutScreen.jpg")}
         style={{
           width: "100%",
           height: "100%",
