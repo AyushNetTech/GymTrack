@@ -40,7 +40,7 @@ const DIFFICULTIES = [
 export default function WorkoutScreen() {
   const navigation = useNavigation<any>();
   const { gender } = useUser();
-
+  const normalizeDifficulty = (level: string) => level.toLowerCase().trim();
   const [initialLoading, setInitialLoading] = useState(true);
   const [exerciseLoading, setExerciseLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
@@ -49,77 +49,86 @@ export default function WorkoutScreen() {
   const [exercises, setExercises] = useState<any[]>([]);
   
   const mapGenderToDB = (gender?: string) => {
-  if (!gender) return null;
+    if (!gender) return null;
 
-  const g = gender.toLowerCase();
+    const g = gender.toLowerCase();
 
-  if (g === "female" || g === "women") return "women";
-  if (g === "male" || g === "men") return "men";
+    if (g === "female" || g === "women") return "women";
+    if (g === "male" || g === "men") return "men";
 
-  return null;
-};
+    return null;
+  };
 
-const dbGender = mapGenderToDB(gender);
-
-
-  useEffect(() => {
-  setInitialLoading(true);
-  setSelectedCategory(null);
-  setSelectedDifficulty(null);
-  setExercises([]);
-
-  async function reload() {
-  const { data, error } = await supabase
-    .from("exercises")
-    .select("muscle_group")
-    .eq("gender", dbGender)
-    .eq("status", "active");
-
-  console.log("APP GENDER:", gender);
-console.log("DB GENDER:", dbGender);
-
-  const unique = [
-    ...new Set(
-      data
-        ?.map(i => i.muscle_group?.trim())
-        .filter(Boolean)
-    ),
-  ];
-
-  console.log("CATEGORIES:", unique);
-
-  setCategories(unique);
-  setSelectedCategory(unique[0] || null);
-  setInitialLoading(false);
-}
-
-
-
-  console.log("CATEGORIES:", gender);
-  reload();
-}, [gender]);
+  const dbGender = mapGenderToDB(gender);
 
   useEffect(() => {
-    if (!selectedCategory || !selectedDifficulty) return;
+    if (!dbGender) return;
 
-    async function loadExercises() {
-      setExerciseLoading(true);
+    setInitialLoading(true);
+    setSelectedCategory(null);
+    setSelectedDifficulty(null);
+    setExercises([]);
 
-      const { data } = await supabase
+    async function reload() {
+      const { data, error } = await supabase
         .from("exercises")
-        .select("id, exercise_name, equipment")
-        .eq("gender", gender)
-        .eq("muscle_group", selectedCategory)
-        .eq("difficulty", selectedDifficulty)
-        .eq("status", "active")
-        .order("exercise_name");
+        .select("muscle_group")
+        .eq("gender", dbGender)
+        .eq("status", "active");
 
-      setExercises(data || []);
-      setExerciseLoading(false);
+      console.log("APP GENDER:", gender);
+      console.log("DB GENDER:", dbGender);
+      console.log("RAW CATEGORY DATA:", data, error);
+
+      const unique = [
+        ...new Set(
+          data
+            ?.map(i => i.muscle_group?.trim())
+            .filter(Boolean)
+        ),
+      ];
+
+      console.log("CATEGORIES:", unique);
+
+      setCategories(unique);
+      setSelectedCategory(unique[0] || null);
+      setInitialLoading(false);
     }
 
-    loadExercises();
-  }, [selectedCategory, selectedDifficulty, gender]);
+    reload();
+  }, [dbGender]);
+
+
+  useEffect(() => {
+  if (!selectedCategory || !selectedDifficulty || !dbGender) return;
+
+  async function loadExercises() {
+    setExerciseLoading(true);
+
+    const { data, error } = await supabase
+      .from("exercises")
+      .select("id, exercise_name, equipment")
+      .eq("gender", dbGender)
+      .eq("muscle_group", selectedCategory)
+      .eq("difficulty", normalizeDifficulty(selectedDifficulty))
+      .eq("status", "active")
+      .order("exercise_name");
+
+    console.log("LOAD EXERCISES:", {
+      gender: dbGender,
+      category: selectedCategory,
+      difficulty: selectedDifficulty,
+      data,
+      error,
+    });
+
+    setExercises(data || []);
+    setExerciseLoading(false);
+  }
+
+  loadExercises();
+}, [selectedCategory, selectedDifficulty, dbGender]);
+
 
   if (initialLoading) return <LoadingScreen visible />;
 
@@ -237,51 +246,64 @@ console.log("DB GENDER:", dbGender);
           )}
         />
       ) : (
-        <FlatList
-          data={exercises}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("ExerciseDetail", { exerciseId: item.id })
-              }
-              style={{
-                flexDirection: "row",
-                backgroundColor: "#1c1c1e",
-                borderRadius: 16,
-                marginBottom: 14,
-                overflow: "hidden",
-              }}
-            >
-              <View
-                style={{
-                  width: 110,
-                  height: 90,
-                  backgroundColor: "#000",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#f4ff47", fontSize: 22 }}>▶</Text>
-              </View>
-
-              <View style={{ flex: 1, padding: 12, justifyContent: "center" }}>
-                <Text
-                  style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
-                  numberOfLines={2}
-                >
-                  {item.exercise_name}
+          <>
+            {!exerciseLoading && exercises.length === 0 ? (
+              <View style={{ marginTop: 60, alignItems: "center" }}>
+                <Text style={{ color: "#aaa", fontSize: 16 }}>
+                  No exercises available
                 </Text>
-
-                <Text style={{ color: "#aaa", marginTop: 4, fontSize: 13 }}>
-                  {item.equipment || "No equipment"}
+                <Text style={{ color: "#666", fontSize: 13, marginTop: 6 }}>
+                  Try another level or category
                 </Text>
               </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+            ) : (
+              <FlatList
+                data={exercises}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("ExerciseDetail", { exerciseId: item.id })
+                    }
+                    style={{
+                      flexDirection: "row",
+                      backgroundColor: "#1c1c1e",
+                      borderRadius: 16,
+                      marginBottom: 14,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 110,
+                        height: 90,
+                        backgroundColor: "#000",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={{ color: "#f4ff47", fontSize: 22 }}>▶</Text>
+                    </View>
+
+                    <View style={{ flex: 1, padding: 12, justifyContent: "center" }}>
+                      <Text
+                        style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
+                        numberOfLines={2}
+                      >
+                        {item.exercise_name}
+                      </Text>
+
+                      <Text style={{ color: "#aaa", marginTop: 4, fontSize: 13 }}>
+                        {item.equipment || "No equipment"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+          </>
+        )}
     </SafeAreaView>
   );
 }
