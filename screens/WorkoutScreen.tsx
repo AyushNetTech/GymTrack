@@ -76,10 +76,6 @@ export default function WorkoutScreen() {
         .eq("gender", dbGender)
         .eq("status", "active");
 
-      console.log("APP GENDER:", gender);
-      console.log("DB GENDER:", dbGender);
-      console.log("RAW CATEGORY DATA:", data, error);
-
       const unique = [
         ...new Set(
           data
@@ -87,8 +83,6 @@ export default function WorkoutScreen() {
             .filter(Boolean)
         ),
       ];
-
-      console.log("CATEGORIES:", unique);
 
       setCategories(unique);
       setSelectedCategory(unique[0] || null);
@@ -113,14 +107,6 @@ export default function WorkoutScreen() {
       .eq("difficulty", normalizeDifficulty(selectedDifficulty))
       .eq("status", "active")
       .order("exercise_name");
-
-    console.log("LOAD EXERCISES:", {
-      gender: dbGender,
-      category: selectedCategory,
-      difficulty: selectedDifficulty,
-      data,
-      error,
-    });
 
     setExercises(data || []);
     setExerciseLoading(false);
