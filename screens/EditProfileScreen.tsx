@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { RulerPicker } from "react-native-ruler-picker";
 import { supabase } from "../lib/supabase";
+import LoadingScreen from "../components/LoadingScreen";
 
 const PRIMARY = "#f4ff47";
 const BG = "#111";
@@ -116,7 +117,9 @@ export default function EditProfileScreen({ navigation }: any) {
     }
   }
 
-  if (loading) return null;
+  if (loading) {
+    return <LoadingScreen visible />;
+  } 
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -205,7 +208,6 @@ export default function EditProfileScreen({ navigation }: any) {
           indicatorColor={PRIMARY}
           valueTextStyle={{ color: PRIMARY, fontSize: 26, fontWeight: "900" }}
           unitTextStyle={{ color: "#aaa", fontSize:22}}
-          backgroundColor="#0f0f0f"
         />
 
         {/* HEIGHT */}
@@ -221,7 +223,6 @@ export default function EditProfileScreen({ navigation }: any) {
           indicatorColor={PRIMARY}
           valueTextStyle={{ color: PRIMARY, fontSize: 26, fontWeight: "900" }}
           unitTextStyle={{ color: "#aaa" }}
-          backgroundColor="#0f0f0f"
         />
       </ScrollView>
     </SafeAreaView>
