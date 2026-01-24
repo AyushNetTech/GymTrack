@@ -252,7 +252,7 @@ export default function WorkoutScreen() {
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     onPress={() =>
-                      navigation.navigate("ExerciseDetail", { exerciseId: item.id })
+                      navigation.navigate("ExercisePreview", { exerciseId: item.id })
                     }
                     style={{
                       flexDirection: "row",

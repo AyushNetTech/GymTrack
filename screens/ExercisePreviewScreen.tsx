@@ -17,7 +17,7 @@ import WorkoutHeader, { HEADER_HEIGHT } from "../components/WorkoutHeader";
 const R2_BASE_URL =
   "https://pub-df2239b39e864531a0e2248637235dab.r2.dev";
 
-export default function ExerciseDetailScreen() {
+export default function ExercisePreviewScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { exerciseId } = route.params;

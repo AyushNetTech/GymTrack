@@ -81,7 +81,7 @@ export default function AddWorkoutScreen() {
   };
 
   const handleExercisePress = (exercise: Exercise) => {
-    navigation.navigate("ExerciseDetails", { exercise });
+    navigation.navigate("ExerciseLog", { exercise });
   };
 
   // Show LoadingScreen only while **categories are loading**

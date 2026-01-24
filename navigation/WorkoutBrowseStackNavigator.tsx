@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import WorkoutScreen from "../screens/WorkoutScreen";
-import ExerciseDetailScreen from "../screens/ExerciseDetailScreen";
+import ExercisePreviewScreen from "../screens/ExercisePreviewScreen";
 import WorkoutHeader, { HEADER_HEIGHT } from "../components/WorkoutHeader";
 
 const Stack = createNativeStackNavigator();
@@ -17,7 +17,7 @@ export default function WorkoutBrowseStackNavigator() {
       <View style={{ flex: 1 }}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="WorkoutMain" component={WorkoutScreen} />
-          <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
+          <Stack.Screen name="ExercisePreview" component={ExercisePreviewScreen} />
         </Stack.Navigator>
       </View>
     </View>

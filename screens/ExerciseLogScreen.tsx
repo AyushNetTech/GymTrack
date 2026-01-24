@@ -21,7 +21,7 @@ type SetData = {
   unit: 'kg' | 'lbs';
 };
 
-export default function ExerciseDetailsScreen({ route, navigation }: any) {
+export default function ExerciseLogScreen({ route, navigation }: any) {
   const { exercise } = route.params;
   const [userId, setUserId] = useState<string | null>(null);
   const [setsList, setSetsList] = useState<SetData[]>([{ reps: '', weight: '', unit: 'kg' }]);
