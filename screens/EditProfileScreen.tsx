@@ -204,7 +204,7 @@ export default function EditProfileScreen({ navigation }: any) {
           height={120}
           indicatorColor={PRIMARY}
           valueTextStyle={{ color: PRIMARY, fontSize: 26, fontWeight: "900" }}
-          unitTextStyle={{ color: "#aaa" }}
+          unitTextStyle={{ color: "#aaa", fontSize:22}}
           backgroundColor="#0f0f0f"
         />
 
