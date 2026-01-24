@@ -9,6 +9,7 @@ import AnalysisScreen from "../screens/AnalysisScreen"
 import ProfileScreen from "../screens/ProfileScreen"
 import WorkoutStackNavigator from "./WorkoutStackNavigator"
 import CurvedTabBar from "../components/CurvedTabBar"
+import ProfileStackNavigator from "./ProfileStackNavigator"
 
 type TabIconProps = { name: keyof typeof Ionicons.glyphMap; focused: boolean }
 
@@ -62,7 +63,10 @@ export default function TabNavigator({ onHomeReady }: Props) {
       {/* Replace AddWorkout with the stack navigator */}
       <Tab.Screen name="AddWorkout" component={WorkoutStackNavigator} />
       <Tab.Screen name="Analysis" component={AnalysisScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStackNavigator}
+      />
     </Tab.Navigator>
   )
 }

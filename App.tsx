@@ -25,6 +25,7 @@ export type RootStackParamList = {
   Home: undefined;
   ResetPassword: { url?: string } | undefined;
   ProfileSetup: undefined;
+  Loading: undefined; // ✅ ADD THIS
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -38,6 +39,8 @@ const [profileCompleted, setProfileCompleted] = useState(false);
 const [introCompleted, setIntroCompleted] = useState(false);
 const [initialAppLoad, setInitialAppLoad] = useState(true);
 const [homeReady, setHomeReady] = useState(false);
+const [authInitializing, setAuthInitializing] = useState(true);
+
 const appReady =
   authStateReady &&
   initialAppLoad === false &&
@@ -75,7 +78,7 @@ useEffect(() => {
       
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      
+      setAuthInitializing(false);
     };
     init();
 
@@ -111,6 +114,12 @@ useEffect(() => {
 
     checkProfile();
   }, [session]);
+  const getInitialRoute = (): keyof RootStackParamList => {
+    if (!session && !introCompleted) return "Intro";
+    if (!session && introCompleted) return "Auth";
+    if (session && profileChecked && !profileCompleted) return "ProfileSetup";
+    return "Home";
+  };
 
   return (
     <UserProvider>
@@ -118,62 +127,58 @@ useEffect(() => {
       <PaperProvider>
         <ToastProvider>
           <StatusBar barStyle="light-content" backgroundColor="black" />
-          {!appReady ? (
+          {authInitializing  ? (
             <LoadingScreen visible />
           ) : (
-          <NavigationContainer
-            ref={navigationRef}
-          >
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <NavigationContainer ref={navigationRef}>
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-              {/* Intro */}
-              {!session && !introCompleted && (
-                <Stack.Screen name="Intro">
-                  {(props) => (
-                    <IntroScreen
-                      {...props}
-                      onIntroCompleted={() => setIntroCompleted(true)}
-                    />
-                  )}
-                </Stack.Screen>
-              )}
-
-              {/* Auth */}
-              {!session && introCompleted && (
-                <>
-                  <Stack.Screen name="Auth" component={AuthScreen} />
-                  <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-                </>
-              )}
-
-              {/* Profile setup */}
-                {session && profileChecked && !profileCompleted && (
-                  <Stack.Screen name="ProfileSetup">
+                {/* INTRO */}
+                {!session && !introCompleted && (
+                  <Stack.Screen name="Intro">
                     {(props) => (
-                      <ProfileSetupScreen
+                      <IntroScreen
                         {...props}
-                        onProfileCompleted={() => {
-                          setProfileCompleted(true);
-                        }}
+                        onIntroCompleted={() => setIntroCompleted(true)}
                       />
                     )}
                   </Stack.Screen>
                 )}
 
-              {/* Main app */}
-              {session && profileCompleted && (
-                <Stack.Screen name="Home">
-                  {(props) => (
-                    <TabNavigator
-                      {...props}
-                      onHomeReady={() => setHomeReady(true)}
-                    />
-                  )}
-                </Stack.Screen>
-              )}
-            </Stack.Navigator>
+                {/* AUTH */}
+                {!session && introCompleted && (
+                  <>
+                    <Stack.Screen name="Auth" component={AuthScreen} />
+                    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+                  </>
+                )}
 
-          </NavigationContainer>
+                {/* PROFILE CHECK IN PROGRESS */}
+                {session && !profileChecked && (
+                  <Stack.Screen name="Loading">
+                    {() => <LoadingScreen visible />}
+                  </Stack.Screen>
+                )}
+
+                {/* PROFILE SETUP */}
+                {session && profileChecked && !profileCompleted && (
+                  <Stack.Screen name="ProfileSetup">
+                    {(props) => (
+                      <ProfileSetupScreen
+                        {...props}
+                        onProfileCompleted={() => setProfileCompleted(true)}
+                      />
+                    )}
+                  </Stack.Screen>
+                )}
+
+                {/* MAIN APP */}
+                {session && profileCompleted && (
+                  <Stack.Screen name="Home" component={TabNavigator} />
+                )}
+
+              </Stack.Navigator>
+            </NavigationContainer>
           )}
         </ToastProvider>
       </PaperProvider>

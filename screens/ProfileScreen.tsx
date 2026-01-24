@@ -20,7 +20,6 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useToast } from "../components/ToastProvider";
 import { navigationRef } from "../navigation/navigationRef";
 import { clearProfileCompleted } from "../utils/profileState";
-import { clearAuthStarted } from "../utils/authState";
 
 
 function calculateAge(birthdate?: string | null) {
@@ -190,7 +189,11 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
 
-          <ProfileItem title="My Profile" icon="account-outline" />
+          <ProfileItem
+            title="My Profile"
+            icon="account-outline"
+            onPress={() => navigationRef.navigate("EditProfile")}
+          />
           <ProfileItem title="Achievement" icon="trophy-outline" />
           <ProfileItem title="Activity History" icon="history" />
           <ProfileItem title="Workout Progress" icon="chart-line" />
@@ -199,21 +202,13 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={styles.signOut}
           onPress={async () => {
-            // 1️⃣ Supabase sign out
-            await supabase.auth.signOut();
-
-            // 2️⃣ Clear ALL auth-bound local storage
-            await clearProfileCompleted();
-            await clearAuthStarted();
-
-            // (optional safety net – not required but OK)
-            // await AsyncStorage.clear();
-
-            // 3️⃣ Reset navigation
-            navigationRef.reset({
-              index: 0,
-              routes: [{ name: "Auth" }],
-            });
+            try {
+              await supabase.auth.signOut();
+              await clearProfileCompleted();
+              // ✅ nothing else
+            } catch (e) {
+              console.log("Sign out error:", e);
+            }
           }}
         >
           <Text style={{ color: "white", fontSize: 14, fontWeight: "bold" }}>
@@ -235,8 +230,8 @@ const Stat = ({ label, value }: any) => (
   </View>
 );
 
-const ProfileItem = ({ title, icon }: any) => (
-  <TouchableOpacity style={styles.itemRow}>
+const ProfileItem = ({ title, icon, onPress }: any) => (
+  <TouchableOpacity style={styles.itemRow} onPress={onPress}>
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <MaterialCommunityIcons name={icon} size={22} color="#aaa" />
       <Text style={styles.itemText}>{title}</Text>
