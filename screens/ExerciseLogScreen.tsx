@@ -99,23 +99,35 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
 };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#111', padding:16, paddingTop:-20}}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Floating Header */}
-    <View style={styles.floatingHeader}>
-      <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center',  paddingBottom:20 }}
-        onPress={handleBack}
-      >
-        <Ionicons name="arrow-back-outline" size={24} color="#f4ff47" />
-        <Text style={{ color: '#f4ff47', fontSize: 18, marginLeft: 8 }}>Back</Text>
-      </TouchableOpacity>
-      <Text style={styles.heading}>{exercise.exercise_name}</Text>
-    </View>
-        <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 20, paddingBottom: 150, paddingTop:120 }}>
+        <View style={styles.floatingHeader}>
+          <TouchableOpacity
+            style={styles.backRow}
+            onPress={handleBack}
+            activeOpacity={0.7}
+          >
+            <Text style={{ color: "#f4ff47", fontSize: 16, fontWeight:900 }}>← Back</Text>
+          </TouchableOpacity>
+
+          <Text style={{ color: "#aaa", marginTop: 6 }}>
+            {exercise.muscle_group} • {exercise.difficulty}
+          </Text>
+
+          <Text
+            style={styles.heading}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {exercise.exercise_name}
+          </Text>
+        </View>
+
+        <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 0, paddingBottom: 150, paddingTop:150 }}>
 
           {setsList.map((s, idx) => (
             <View key={idx} style={styles.setCard}>
@@ -178,7 +190,6 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  heading: { color: '#fff', fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
   setCard: { backgroundColor: '#222', padding: 15, borderRadius: 12, marginBottom: 15 },
   setHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
   setTitle: { color: '#fff', fontWeight: 'bold' },
@@ -211,9 +222,31 @@ const styles = StyleSheet.create({
   top: 0,
   left: 0,
   right: 0,
-  backgroundColor: '#000',
-  paddingHorizontal: 20,
-  paddingTop: 20,
+  backgroundColor: '#111',
+  paddingHorizontal: 0,
+  paddingTop: 0,
   zIndex: 10,
 },
+backRow: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+backText: {
+  color: "#f4ff47",
+  fontSize: 16,
+  fontWeight: "900",
+  marginLeft: 6,
+},
+
+heading: {
+  color: "#fff",
+  fontSize: 24,
+  fontWeight: "700",
+  // lineHeight: 26,
+  marginTop:4,
+  maxHeight: 55, // EXACTLY 2 lines
+  marginBottom:10
+},
+
 });

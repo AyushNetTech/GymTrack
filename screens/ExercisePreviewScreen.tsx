@@ -129,7 +129,7 @@ export default function ExercisePreviewScreen() {
           <TouchableOpacity
         style={{
           marginTop: 30,
-          backgroundColor: "#32CD32",
+          backgroundColor: "#f4ff47",
           padding: 16,
           borderRadius: 12,
           alignItems: "center",
