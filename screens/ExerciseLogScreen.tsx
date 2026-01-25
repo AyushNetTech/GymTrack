@@ -197,13 +197,13 @@ const styles = StyleSheet.create({
   unitButtonActiveText: { color:"#000", fontWeight: '900' },
   unitText: { color: '#fff', fontWeight: '900' },
   addButton: {
-    backgroundColor: '#32CD32',
+    backgroundColor: '#f4ff47',
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 15,
   },
-  addButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  addButtonText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
   saveButton: { backgroundColor: '#1E90FF', padding: 15, borderRadius: 12, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   floatingHeader: {
