@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Ionicons } from '@expo/vector-icons'; // make sure to import Ionicons
+import { CommonActions } from "@react-navigation/native";
 
 type SetData = {
   reps: string;
@@ -22,11 +23,15 @@ type SetData = {
 };
 
 export default function ExerciseLogScreen({ route, navigation }: any) {
-  const { exercise } = route.params;
   const [userId, setUserId] = useState<string | null>(null);
   const [setsList, setSetsList] = useState<SetData[]>([{ reps: '', weight: '', unit: 'kg' }]);
-
+  const { exercise, returnTab } = route.params
   const scrollRef = useRef<ScrollView>(null);
+
+  const handleBack = () => {
+  navigation.goBack();
+};
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,30 +64,39 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
   };
 
   const saveWorkout = async () => {
-    if (!userId) return Alert.alert('User not logged in');
+  if (!userId) {
+    Alert.alert("Error", "User not logged in");
+    return;
+  }
 
-    const inserts = setsList.map((s, idx) => {
-      const weightKg =
-        s.unit === 'lbs' && s.weight
-          ? parseFloat(s.weight) * 0.453592
-          : parseFloat(s.weight || '0');
-      return {
-        user_id: userId,
-        workout_id: exercise.id,
-        sets: 1, // each row is a single set
-        reps: parseInt(s.reps || '0'),
-        weight: weightKg,
-        notes: null,
-      };
-    });
+  const inserts = setsList.map((s) => ({
+    user_id: userId,
+    workout_id: exercise.id,
+    sets: 1,
+    reps: Number(s.reps || 0),
+    weight:
+      s.unit === "lbs"
+        ? Number(s.weight || 0) * 0.453592
+        : Number(s.weight || 0),
+    notes: null,
+  }));
 
-    const { error } = await supabase.from('user_workouts').insert(inserts);
-    if (error) Alert.alert('Error', error.message);
-    else {
-      Alert.alert('Workout saved!');
-      navigation.goBack();
-    }
-  };
+  const { error } = await supabase.from("user_workouts").insert(inserts);
+
+  if (error) {
+    Alert.alert("Error", error.message);
+    return;
+  }
+
+  Alert.alert("Workout saved!", "Your workout has been logged.", [
+    {
+      text: "OK",
+      onPress: () => {
+        navigation.goBack();
+      },
+    },
+  ]);
+};
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
@@ -94,12 +108,12 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
     <View style={styles.floatingHeader}>
       <TouchableOpacity
         style={{ flexDirection: 'row', alignItems: 'center',  paddingBottom:20 }}
-        onPress={() => navigation.goBack()}
+        onPress={handleBack}
       >
         <Ionicons name="arrow-back-outline" size={24} color="#f4ff47" />
         <Text style={{ color: '#f4ff47', fontSize: 18, marginLeft: 8 }}>Back</Text>
       </TouchableOpacity>
-      <Text style={styles.heading}>{exercise.name}</Text>
+      <Text style={styles.heading}>{exercise.exercise_name}</Text>
     </View>
         <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 20, paddingBottom: 150, paddingTop:120 }}>
 

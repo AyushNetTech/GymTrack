@@ -20,8 +20,7 @@ const R2_BASE_URL =
 export default function ExercisePreviewScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const { exerciseId } = route.params;
-
+  const { exerciseId, returnTab } = route.params
   const [loading, setLoading] = useState(true);
   const [exercise, setExercise] = useState<any>(null);
   const [videoReady, setVideoReady] = useState(false);
@@ -127,6 +126,28 @@ export default function ExercisePreviewScreen() {
               fullscreenOptions={{ enable: false }}
             />
           </View>
+          <TouchableOpacity
+        style={{
+          marginTop: 30,
+          backgroundColor: "#32CD32",
+          padding: 16,
+          borderRadius: 12,
+          alignItems: "center",
+        }}
+        onPress={() =>
+          navigation.navigate("AddWorkout", {
+            screen: "ExerciseLog",
+            params: {
+              exercise,
+              returnTab: "Workout",
+            },
+          })
+        }
+      >
+        <Text style={{ color: "#000", fontWeight: "bold" }}>
+          Add This Workout
+        </Text>
+      </TouchableOpacity>
         {/* EQUIPMENT */}
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600", marginTop: 22 }}>
           Equipment
