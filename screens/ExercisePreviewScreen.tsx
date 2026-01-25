@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { CommonActions } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { supabase } from "../lib/supabase";
@@ -139,7 +140,7 @@ export default function ExercisePreviewScreen() {
             screen: "ExerciseLog",
             params: {
               exercise,
-              returnTab: "Workout",
+              returnTab: "AddWorkoutMain",
             },
           })
         }

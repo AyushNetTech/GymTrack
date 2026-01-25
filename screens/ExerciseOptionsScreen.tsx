@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { CommonActions } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
@@ -77,7 +78,7 @@ export default function ExerciseOptionsScreen({ route, navigation }: any) {
               screen: "ExerciseLog",
               params: {
                 exercise,
-                returnTab: "Workout",
+                returnTab: "AddWorkoutMain",
               },
             })
           }

@@ -42,7 +42,7 @@ type Props = {
 
 export default function WorkoutHeader({ title = "Workouts" }: Props) {
   return (
-    <View style={{ height: HEADER_HEIGHT }}>
+    <View style={{ height: HEADER_HEIGHT, backgroundColor:"#111" }}>
       <Image
         source={require("../assets/HeaderWorkoutScreen.jpg")}
         style={{

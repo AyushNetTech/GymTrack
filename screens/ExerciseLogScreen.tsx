@@ -29,9 +29,14 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
   const scrollRef = useRef<ScrollView>(null);
 
   const handleBack = () => {
-  navigation.goBack();
-};
-
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate("AddWorkout", {
+        screen: "AddWorkoutMain",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -89,13 +94,15 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
   }
 
   Alert.alert("Workout saved!", "Your workout has been logged.", [
-    {
-      text: "OK",
-      onPress: () => {
-        navigation.goBack();
-      },
+  {
+    text: "OK",
+    onPress: () => {
+      navigation.navigate("AddWorkout", {
+        screen: "AddWorkoutMain",
+      });
     },
-  ]);
+  },
+]);
 };
 
   return (

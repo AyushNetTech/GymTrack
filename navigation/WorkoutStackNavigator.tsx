@@ -24,7 +24,13 @@ export default function WorkoutStackNavigator() {
     
           {/* ✅ Stack BELOW header */}
           <View style={{ flex: 1 }}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Navigator
+              screenOptions={{
+                headerShown: false,
+                animation:"none",
+                contentStyle: { backgroundColor: "#111" },
+              }}
+            >
               <Stack.Screen name="AddWorkoutMain" component={AddWorkoutScreen} />
               <Stack.Screen name="ExerciseOptions" component={ExerciseOptionsScreen} />
               <Stack.Screen name="ExercisePreview" component={ExercisePreviewScreen} />
