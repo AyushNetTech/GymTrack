@@ -150,14 +150,14 @@ export default function ExerciseLogScreen({ route, navigation }: any) {
                     style={[styles.unitButton, s.unit === 'kg' && styles.unitButtonActive]}
                     onPress={() => handleSetChange(idx, 'unit', 'kg')}
                   >
-                    <Text style={styles.unitText}>KG</Text>
+                    <Text style={[styles.unitText, s.unit === 'kg' && styles.unitButtonActiveText]}>KG</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[styles.unitButton, s.unit === 'lbs' && styles.unitButtonActive]}
                     onPress={() => handleSetChange(idx, 'unit', 'lbs')}
                   >
-                    <Text style={styles.unitText}>LBS</Text>
+                    <Text style={[styles.unitText, s.unit === 'lbs' && styles.unitButtonActiveText]}>LBS</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -194,7 +194,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   unitButtonActive: { backgroundColor: '#f4ff47' },
-  unitText: { color: '#fff', fontWeight: 'bold' },
+  unitButtonActiveText: { color:"#000", fontWeight: '900' },
+  unitText: { color: '#fff', fontWeight: '900' },
   addButton: {
     backgroundColor: '#32CD32',
     padding: 15,
