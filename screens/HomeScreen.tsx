@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { emitter } from "../lib/emitter";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "../context/UserContext";
-
+import DailyStreak from "../components/DailyStreak";
 
 export default function HomeScreen({
   onReady,
@@ -19,22 +19,44 @@ export default function HomeScreen({
 
   const defaultAvatar = require("../assets/blankprofile.png"); // fallback
 
+  async function markUserActiveToday() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    // local date YYYY-MM-DD
+    const today = new Date().toLocaleDateString("en-CA");
+
+    await supabase.rpc("update_streak_on_home_open", {
+      user_id_input: user.id,
+      today_input: today,
+    });
+  }
+
   useEffect(() => {
+  const init = async () => {
     generateWeek();
-    loadProfile();
+    await markUserActiveToday(); // ⬅️ WAIT here
+    await loadProfile();
+  };
 
-    const listener = (newAvatarUrl: string) => {
-      setProfile((prev: any) => ({
-        ...prev,
-        avatar_url: newAvatarUrl,
-      }));
-    };
+  init();
 
-    emitter.on("profileUpdated", listener);
-    return () => {
-      emitter.off("profileUpdated", listener);
-    };
-  }, []);
+  const listener = (newAvatarUrl: string) => {
+    setProfile((prev: any) => ({
+      ...prev,
+      avatar_url: newAvatarUrl,
+    }));
+  };
+
+  emitter.on("profileUpdated", listener);
+  return () => {
+    emitter.off("profileUpdated", listener);
+  };
+}, []);
+
 
   async function loadProfile() {
   try {
@@ -43,10 +65,10 @@ export default function HomeScreen({
     if (!user) return;
 
     const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+    .from("profiles")
+    .select("*, current_streak, last_active_date")
+    .eq("id", user.id)
+    .single();
 
     setProfile(profileData ?? null);
     if (profileData?.gender) {
@@ -138,6 +160,13 @@ export default function HomeScreen({
         contentContainerStyle={{ paddingBottom: 50 }}
         showsVerticalScrollIndicator={false}
       >
+
+        {/* DAILY STREAK */}
+        <DailyStreak
+          loading={!profile}
+          currentStreak={profile?.current_streak ?? 0}
+          lastActiveDate={profile?.last_active_date ?? null}
+        />
         {/* Everything below is EXACTLY your UI unchanged */}
         <Text style={styles.sectionTitle}>Recent Activity</Text>
 
