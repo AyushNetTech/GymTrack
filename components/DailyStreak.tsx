@@ -208,7 +208,7 @@ const days = useMemo(() => {
           <View style={styles.reward}>
             <Ionicons
               name={streak === 7 ? "gift" : "gift-outline"}
-              size={18}
+              size={28}
               color="#f4ff47"
             />
           </View>
