@@ -56,12 +56,12 @@ export default function DailyStreak({
 
   useEffect(() => {
   if (streak > prevStreak.current) {
-    todayScale.setValue(1.25);
+    todayScale.setValue(1.8);
 
     Animated.spring(todayScale, {
       toValue: 1,
-      friction: 5,
-      tension: 120,
+      friction: 6,
+      tension: 200,
       useNativeDriver: true,
     }).start();
   }
@@ -204,12 +204,15 @@ const days = useMemo(() => {
           );
         })}
 
-        <View style={styles.reward}>
-          <Ionicons
-            name={streak === 7 ? "gift" : "gift-outline"}
-            size={18}
-            color="#f4ff47"
-          />
+        <View style={styles.dayWrapper}>
+          <View style={styles.reward}>
+            <Ionicons
+              name={streak === 7 ? "gift" : "gift-outline"}
+              size={18}
+              color="#f4ff47"
+            />
+          </View>
+          <Text style={styles.dayText}></Text>
         </View>
       </View>
       <Text style={{color:"#afafaf", textAlign:"center", paddingTop:14}}>Complete 7 Days Streak And Get <Text style={{color:"#f4ff47"}}>Reward</Text></Text>
@@ -319,9 +322,9 @@ const styles = StyleSheet.create({
 
   reward: {
     marginLeft: 10,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#222",
     justifyContent: "center",
     alignItems: "center",
