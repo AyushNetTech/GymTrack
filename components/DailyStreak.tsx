@@ -215,7 +215,7 @@ const days = useMemo(() => {
           <Text style={styles.dayText}></Text>
         </View>
       </View>
-      <Text style={{color:"#afafaf", textAlign:"center", paddingTop:14}}>Complete 7 Days Streak And Get <Text style={{color:"#f4ff47"}}>Reward</Text></Text>
+      <Text style={{color:"#afafaf", textAlign:"center", paddingTop:14}}>Complete 7 Days Streak And Get <Text style={{color:"#f4ff47", fontWeight:"600"}}>Reward</Text></Text>
     </View>
   );
 }
